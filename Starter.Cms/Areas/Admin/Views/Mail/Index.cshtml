@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "E-posta (SMTP)";
+    var s = ViewBag.Settings as IDictionary<string, string> ?? new Dictionary<string, string>();
+    string V(string key, string def = "") => s.TryGetValue(key, out var v) && !string.IsNullOrWhiteSpace(v) ? v : def;
+    bool B(string key) => V(key).Equals("true", StringComparison.OrdinalIgnoreCase);
+}
+
+<partial name="_PageHelp" model="@("İletişim formundan gelen mesajlar buradaki SMTP ayarlarıyla e-posta olarak da gönderilir. Gmail için: Host smtp.gmail.com, Port 587, SSL açık ve uygulama şifresi kullanın. Önce 'Test Gönder' ile deneyin.")" />
+
+<div class="grid gap-6 lg:grid-cols-3">
+    <form method="post" action="/Admin/Mail/Index" class="space-y-5 lg:col-span-2">
+        @Html.AntiForgeryToken()
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            <label class="flex items-center gap-2 text-sm font-semibold">
+                <input type="checkbox" name="values[smtp.enabled]" value="true" @(B("smtp.enabled") ? "checked" : "") class="h-4 w-4 rounded border-slate-300" />
+                E-posta gönderimi aktif
+            </label>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div><label class="form-label">SMTP Sunucu (Host)</label><input class="form-input" name="values[smtp.host]" value="@V("smtp.host")" dir="ltr" /></div>
+                <div><label class="form-label">Port</label><input class="form-input" name="values[smtp.port]" value="@V("smtp.port", "587")" dir="ltr" /></div>
+            </div>
+            <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="values[smtp.ssl]" value="true" @(B("smtp.ssl") ? "checked" : "") class="h-4 w-4 rounded border-slate-300" />
+                SSL/TLS kullan
+            </label>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div><label class="form-label">Kullanıcı Adı</label><input class="form-input" name="values[smtp.user]" value="@V("smtp.user")" dir="ltr" autocomplete="off" /></div>
+                <div><label class="form-label">Şifre</label><input class="form-input" name="values[smtp.password]" type="password" value="@V("smtp.password")" dir="ltr" autocomplete="new-password" /></div>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div><label class="form-label">Gönderen E-posta (Kimden)</label><input class="form-input" name="values[smtp.fromEmail]" value="@V("smtp.fromEmail")" dir="ltr" /></div>
+                <div><label class="form-label">Gönderen Adı</label><input class="form-input" name="values[smtp.fromName]" value="@V("smtp.fromName")" /></div>
+            </div>
+            <div><label class="form-label">Alıcı E-posta (form mesajları buraya gelir)</label><input class="form-input" name="values[smtp.toEmail]" value="@V("smtp.toEmail")" dir="ltr" /></div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            <h3 class="text-sm font-bold text-ink">Mail Şablonu</h3>
+            <p class="text-xs text-slate-400">Yer tutucular: {{name}} {{email}} {{phone}} {{subject}} {{message}} {{date}}</p>
+            <div><label class="form-label">Konu</label><input class="form-input" name="values[mail.contactSubject]" value="@V("mail.contactSubject")" /></div>
+            <div><label class="form-label">Gövde (HTML)</label><textarea class="form-input font-mono text-xs" name="values[mail.contactTemplate]" rows="10">@V("mail.contactTemplate")</textarea></div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="btn-brand">Ayarları Kaydet</button>
+        </div>
+    </form>
+
+    <div>
+        <form method="post" action="/Admin/Mail/SendTest" class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            @Html.AntiForgeryToken()
+            <h3 class="text-sm font-bold text-ink">Test E-postası</h3>
+            <p class="text-xs text-slate-400">Ayarları kaydettikten sonra gerçek gönderimi buradan deneyin.</p>
+            <div>
+                <label class="form-label">Alıcı (boşsa yukarıdaki alıcı)</label>
+                <input class="form-input" name="testEmail" dir="ltr" placeholder="deneme@example.com" />
+            </div>
+            <button type="submit" class="btn-outline w-full"><i data-lucide="send" class="h-4 w-4"></i>Test Gönder</button>
+        </form>
+    </div>
+</div>

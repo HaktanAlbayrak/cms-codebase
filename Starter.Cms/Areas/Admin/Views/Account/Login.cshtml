@@ -1,0 +1,41 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Giriş";
+}
+<!DOCTYPE html>
+<html lang="tr" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Yönetim Girişi</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+    <style>:root{--brand:37 99 235;--brand-dark:30 64 175;--ink:15 23 42;}</style>
+</head>
+<body class="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+    <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h1 class="mb-1 text-center font-display text-2xl font-extrabold text-ink">Yönetim Paneli</h1>
+        <p class="mb-6 text-center text-sm text-slate-500">Devam etmek için giriş yapın</p>
+
+        @if (TempData["Error"] is string err)
+        {
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-800">@err</div>
+        }
+
+        <form method="post" action="/Admin/Account/Login" class="space-y-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <div>
+                <label class="form-label">Kullanıcı Adı</label>
+                <input class="form-input" name="username" autofocus required />
+            </div>
+            <div>
+                <label class="form-label">Şifre</label>
+                <input class="form-input" name="password" type="password" required />
+            </div>
+            <button type="submit" class="btn-brand w-full">Giriş Yap</button>
+        </form>
+        <p class="mt-5 text-center text-xs text-slate-400">Varsayılan: admin / admin123 — appsettings.json'dan değiştirin.</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+@model ErrorViewModel
+@{
+    Layout = null;
+    var isRtl = CultureContext.IsRtl(Model.Culture);
+}
+<!DOCTYPE html>
+<html lang="@Model.Culture" dir="@(isRtl ? "rtl" : "ltr")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>@Model.StatusCode — @Model.Title</title>
+    <link rel="stylesheet" href="~/css/app.css" />
+    <style>
+        /* Hata sayfası DB'ye/marka rengine bağımlı değildir; güvenli varsayılan kanal. */
+        :root { --brand: 37 99 235; --brand-dark: 30 64 175; --ink: 15 23 42; }
+    </style>
+</head>
+<body class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div class="max-w-lg text-center">
+        <p class="font-display text-7xl font-extrabold text-brand">@Model.StatusCode</p>
+        <h1 class="mt-4 text-2xl font-bold text-ink">@Model.Title</h1>
+        <p class="mt-3 text-slate-500">@Model.Message</p>
+        <a href="/@Model.Culture" class="btn-brand mt-8">@Model.HomeLabel</a>
+        @if (!string.IsNullOrEmpty(Model.RequestId))
+        {
+            <p class="mt-6 text-xs text-slate-400">Ref: @Model.RequestId</p>
+        }
+    </div>
+</body>
+</html>

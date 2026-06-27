@@ -1,0 +1,75 @@
+@model HeaderFooterVm
+@{
+    var brand = Model.Branding;
+    string Loc(string path) => CultureContext.LocalizedPath(path);
+    var socials = new (string Url, string Icon)[]
+    {
+        (brand.Facebook, "facebook"),
+        (brand.Instagram, "instagram"),
+        (brand.Linkedin, "linkedin"),
+        (brand.Youtube, "youtube"),
+    };
+}
+<footer class="bg-ink text-slate-300">
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
+        <div class="md:col-span-2">
+            <div class="mb-4">
+                @if (!string.IsNullOrWhiteSpace(brand.LogoLightUrl))
+                {
+                    <img src="@brand.LogoLightUrl" alt="@brand.CompanyName" class="h-9 w-auto" />
+                }
+                else
+                {
+                    <span class="font-display text-xl font-extrabold text-white">@brand.CompanyName</span>
+                }
+            </div>
+            <p class="max-w-md text-sm leading-relaxed text-slate-400">@Localizer["footer.about"]</p>
+            <div class="mt-5 flex gap-2">
+                @foreach (var s in socials)
+                {
+                    if (!string.IsNullOrWhiteSpace(s.Url))
+                    {
+                        <a href="@s.Url" target="_blank" rel="noopener"
+                           class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-300 transition hover:bg-brand hover:text-white">
+                            <i data-lucide="@s.Icon" class="h-4 w-4"></i>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <div>
+            <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-white">@Localizer["footer.linksTitle"]</h3>
+            <ul class="space-y-2 text-sm">
+                @foreach (var item in Model.Menu)
+                {
+                    <li><a href="@Loc(item.Url)" class="text-slate-400 transition hover:text-brand">@item.Label</a></li>
+                }
+            </ul>
+        </div>
+
+        <div>
+            <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-white">@Localizer["footer.contactTitle"]</h3>
+            <ul class="space-y-2 text-sm text-slate-400">
+                @if (!string.IsNullOrWhiteSpace(brand.Address))
+                {
+                    <li class="flex gap-2"><i data-lucide="map-pin" class="mt-0.5 h-4 w-4 shrink-0"></i><span>@brand.Address</span></li>
+                }
+                @if (!string.IsNullOrWhiteSpace(brand.Phone))
+                {
+                    <li class="flex gap-2"><i data-lucide="phone" class="h-4 w-4 shrink-0"></i><span dir="ltr">@brand.Phone</span></li>
+                }
+                @if (!string.IsNullOrWhiteSpace(brand.Email))
+                {
+                    <li class="flex gap-2"><i data-lucide="mail" class="h-4 w-4 shrink-0"></i><a href="mailto:@brand.Email" class="hover:text-brand">@brand.Email</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="border-t border-white/10 py-5">
+        <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-xs text-slate-500 sm:flex-row sm:px-6">
+            <span>© @DateTime.Now.Year @brand.CompanyName. @Localizer["footer.rights"]</span>
+        </div>
+    </div>
+</footer>

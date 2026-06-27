@@ -1,0 +1,104 @@
+@model ContactFormModel
+@inject IBrandingService Branding
+@{
+    var page = ViewBag.Page as PageVm;
+    var brand = await Branding.GetAsync();
+    ViewData["Title"] = page?.MetaTitle ?? Localizer["nav.contact"].Value;
+    ViewData["MetaDescription"] = page?.MetaDescription;
+    var success = TempData["ContactSuccess"] is true;
+}
+
+<section class="border-b border-slate-100 bg-slate-50">
+    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+        <h1 class="font-display text-3xl font-extrabold text-ink sm:text-4xl">@(page?.Title ?? Localizer["nav.contact"].Value)</h1>
+        @if (!string.IsNullOrWhiteSpace(page?.Lead))
+        {
+            <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-500">@(page!.Lead)</p>
+        }
+    </div>
+</section>
+
+<section class="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2">
+    <div>
+        <h2 class="mb-6 text-xl font-bold text-ink">@Localizer["contactPage.infoTitle"]</h2>
+        <ul class="space-y-5 text-sm">
+            @if (!string.IsNullOrWhiteSpace(brand.Address))
+            {
+                <li class="flex gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand"><i data-lucide="map-pin" class="h-5 w-5"></i></span>
+                    <div><p class="font-semibold text-ink">@Localizer["contactPage.addressLabel"]</p><p class="text-slate-500">@brand.Address</p></div>
+                </li>
+            }
+            @if (!string.IsNullOrWhiteSpace(brand.Phone))
+            {
+                <li class="flex gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand"><i data-lucide="phone" class="h-5 w-5"></i></span>
+                    <div><p class="font-semibold text-ink">@Localizer["contactPage.phoneLabel"]</p><p class="text-slate-500" dir="ltr">@brand.Phone</p></div>
+                </li>
+            }
+            @if (!string.IsNullOrWhiteSpace(brand.Email))
+            {
+                <li class="flex gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand"><i data-lucide="mail" class="h-5 w-5"></i></span>
+                    <div><p class="font-semibold text-ink">@Localizer["contactPage.emailLabel"]</p><a href="mailto:@brand.Email" class="text-slate-500 hover:text-brand">@brand.Email</a></div>
+                </li>
+            }
+            @if (!string.IsNullOrWhiteSpace(brand.WorkingHours))
+            {
+                <li class="flex gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand"><i data-lucide="clock" class="h-5 w-5"></i></span>
+                    <div><p class="font-semibold text-ink">@Localizer["contactPage.hoursLabel"]</p><p class="text-slate-500">@brand.WorkingHours</p></div>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="rounded-2xl border border-slate-100 bg-white p-7 shadow-sm">
+        <h2 class="mb-6 text-xl font-bold text-ink">@Localizer["contactPage.formTitle"]</h2>
+
+        @if (success)
+        {
+            <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                @Localizer["contactPage.success"]
+            </div>
+        }
+
+        <form method="post" asp-controller="Contact" asp-action="Index" class="space-y-4">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-sm text-red-600"></div>
+
+            <div>
+                <label class="form-label" asp-for="Name">@Localizer["contactPage.formName"]</label>
+                <input class="form-input" asp-for="Name" />
+                <span asp-validation-for="Name" class="text-xs text-red-600"></span>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="form-label" asp-for="Email">@Localizer["contactPage.formEmail"]</label>
+                    <input class="form-input" asp-for="Email" type="email" />
+                    <span asp-validation-for="Email" class="text-xs text-red-600"></span>
+                </div>
+                <div>
+                    <label class="form-label" asp-for="Phone">@Localizer["contactPage.formPhone"]</label>
+                    <input class="form-input" asp-for="Phone" dir="ltr" />
+                    <span asp-validation-for="Phone" class="text-xs text-red-600"></span>
+                </div>
+            </div>
+            <div>
+                <label class="form-label" asp-for="Subject">@Localizer["contactPage.formSubject"]</label>
+                <input class="form-input" asp-for="Subject" />
+                <span asp-validation-for="Subject" class="text-xs text-red-600"></span>
+            </div>
+            <div>
+                <label class="form-label" asp-for="Message">@Localizer["contactPage.formMessage"]</label>
+                <textarea class="form-input" asp-for="Message" rows="5"></textarea>
+                <span asp-validation-for="Message" class="text-xs text-red-600"></span>
+            </div>
+            <button type="submit" class="btn-brand w-full">@Localizer["contactPage.formSubmit"]</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

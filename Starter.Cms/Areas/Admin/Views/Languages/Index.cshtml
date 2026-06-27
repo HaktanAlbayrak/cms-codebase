@@ -1,0 +1,79 @@
+@model List<Language>
+@{
+    ViewData["Title"] = "Diller";
+}
+
+<partial name="_PageHelp" model="@("Yeni dil eklediğinizde arayüz metinleri varsayılan dilden kopyalanır; 'Arayüz Metinleri' sayfasından çevirebilirsiniz. Varsayılan dil silinemez. Kod 2 harfli olmalı (tr, en, ar, de...).")" />
+
+<div class="grid gap-6 lg:grid-cols-3">
+    <div class="lg:col-span-2">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                    <tr><th class="px-5 py-3">Dil</th><th class="px-5 py-3">Kod</th><th class="px-5 py-3">Durum</th><th class="px-5 py-3 text-right">İşlem</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var l in Model)
+                    {
+                        <tr>
+                            <td class="px-5 py-3">
+                                <details>
+                                    <summary class="cursor-pointer font-medium text-ink">@l.Name @(l.IsDefault ? "★" : "") @(l.IsRtl ? "(RTL)" : "")</summary>
+                                    <form method="post" action="/Admin/Languages/Save" class="mt-3 grid gap-3 sm:grid-cols-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@l.Id" />
+                                        <div><label class="form-label">Kod</label><input class="form-input" name="code" value="@l.Code" maxlength="2" /></div>
+                                        <div><label class="form-label">Ad</label><input class="form-input" name="name" value="@l.Name" /></div>
+                                        <div><label class="form-label">Sıra</label><input class="form-input" name="sortOrder" type="number" value="@l.SortOrder" /></div>
+                                        <div class="flex items-end gap-4">
+                                            <label class="flex items-center gap-1 text-xs"><input type="checkbox" name="isRtl" value="true" @(l.IsRtl ? "checked" : "") /> RTL</label>
+                                            <label class="flex items-center gap-1 text-xs"><input type="checkbox" name="isDefault" value="true" @(l.IsDefault ? "checked" : "") /> Varsayılan</label>
+                                            <label class="flex items-center gap-1 text-xs"><input type="checkbox" name="isActive" value="true" @(l.IsActive ? "checked" : "") /> Aktif</label>
+                                        </div>
+                                        <div class="sm:col-span-2"><button type="submit" class="btn-brand !text-xs">Kaydet</button></div>
+                                    </form>
+                                </details>
+                            </td>
+                            <td class="px-5 py-3 uppercase text-slate-500">@l.Code</td>
+                            <td class="px-5 py-3">
+                                @if (l.IsActive)
+                                {
+                                    <span class="rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-700">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">Pasif</span>
+                                }
+                            </td>
+                            <td class="px-5 py-3 text-right">
+                                @if (!l.IsDefault)
+                                {
+                                    <form method="post" action="/Admin/Languages/Delete/@l.Id" onsubmit="return confirm('@l.Name dili ve çevirileri silinsin mi?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <form method="post" action="/Admin/Languages/Save" class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            @Html.AntiForgeryToken()
+            <h3 class="text-sm font-bold text-ink">Yeni Dil Ekle</h3>
+            <input type="hidden" name="id" value="0" />
+            <div><label class="form-label">Kod (2 harf)</label><input class="form-input" name="code" maxlength="2" placeholder="de" required /></div>
+            <div><label class="form-label">Ad</label><input class="form-input" name="name" placeholder="Deutsch" /></div>
+            <div><label class="form-label">Sıra</label><input class="form-input" name="sortOrder" type="number" value="@(Model.Count + 1)" /></div>
+            <div class="flex gap-4">
+                <label class="flex items-center gap-1 text-xs"><input type="checkbox" name="isRtl" value="true" /> RTL</label>
+                <label class="flex items-center gap-1 text-xs"><input type="checkbox" name="isActive" value="true" checked /> Aktif</label>
+            </div>
+            <button type="submit" class="btn-brand w-full"><i data-lucide="plus" class="h-4 w-4"></i>Dil Ekle</button>
+        </form>
+    </div>
+</div>

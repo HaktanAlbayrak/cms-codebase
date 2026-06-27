@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Marka renkleri için varsayılan kanallar (admin/login/hata sayfaları DB'ye
+       bağlanamadığında bunlar geçerli olur). Layout, DB'deki hex'ten gerçek
+       değerleri enjekte eder. */
+    --brand: 37 99 235; /* mavi-600 */
+    --brand-dark: 30 64 175; /* mavi-800 */
+    --ink: 15 23 42; /* slate-900 */
+  }
+
+  body {
+    @apply font-sans text-ink antialiased;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition;
+  }
+  .btn-brand {
+    @apply btn bg-brand text-white hover:bg-brand-dark;
+  }
+  .btn-outline {
+    @apply btn border border-slate-300 text-slate-700 hover:bg-slate-50;
+  }
+  .form-input {
+    @apply w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/30;
+  }
+  .form-label {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+  }
+}

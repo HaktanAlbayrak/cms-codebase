@@ -1,0 +1,35 @@
+@model DashboardVm
+@{
+    ViewData["Title"] = "Panel";
+    (string Label, int Count, string Icon, string Url)[] cards =
+    {
+        ("Sayfalar", Model.PageCount, "file-text", "/Admin/Pages"),
+        ("Slaytlar", Model.SlideCount, "images", "/Admin/Slides"),
+        ("Diller", Model.LanguageCount, "languages", "/Admin/Languages"),
+        ("Mesajlar", Model.MessageCount, "inbox", "/Admin/Messages"),
+    };
+}
+
+<partial name="_PageHelp" model="@("Hoş geldiniz. Soldaki menüden içerikleri yönetebilirsiniz. Tüm metinler, görseller, logo, renk ve e-posta ayarları buradan değiştirilir — sitede sabit (statik) hiçbir içerik yoktur.")" />
+
+<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    @foreach (var c in cards)
+    {
+        <a href="@c.Url" class="rounded-2xl border border-slate-200 bg-white p-5 transition hover:shadow-md">
+            <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                <i data-lucide="@c.Icon" class="h-5 w-5"></i>
+            </div>
+            <p class="text-3xl font-extrabold text-ink">@c.Count</p>
+            <p class="text-sm text-slate-500">@c.Label</p>
+        </a>
+    }
+</div>
+
+@if (Model.UnreadMessageCount > 0)
+{
+    <div class="mt-6 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <i data-lucide="bell" class="h-4 w-4"></i>
+        <span><strong>@Model.UnreadMessageCount</strong> okunmamış mesajınız var.</span>
+        <a href="/Admin/Messages" class="font-semibold underline">Görüntüle</a>
+    </div>
+}

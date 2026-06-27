@@ -1,0 +1,82 @@
+@*
+    Tek medya kütüphanesi seçici. Her görsel/PDF alanında "Medyadan Seç" ile açılır:
+        window.openMediaPicker(function (url) { ... });
+    Yeni yükleme de aynı kütüphaneye (/uploads) düşer ve listede görünür.
+*@
+<div id="mediaPicker" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/50" onclick="closeMediaPicker()"></div>
+    <div class="absolute left-1/2 top-1/2 max-h-[85vh] w-[90vw] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+            <h3 class="text-sm font-bold text-ink">Medya Kütüphanesi</h3>
+            <button type="button" onclick="closeMediaPicker()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <div class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-5 py-3">
+            <input type="file" id="mpUploadInput" class="text-xs" accept="image/*,video/*,application/pdf" />
+            <button type="button" onclick="mpUpload()" class="btn-brand !px-3 !py-1.5 !text-xs">Yükle</button>
+            <span id="mpUploadMsg" class="text-xs text-slate-500"></span>
+        </div>
+        <div id="mpGrid" class="grid max-h-[55vh] grid-cols-3 gap-3 overflow-y-auto p-5 sm:grid-cols-4">
+            <p class="col-span-full text-sm text-slate-400">Yükleniyor…</p>
+        </div>
+    </div>
+</div>
+@Html.AntiForgeryToken()
+
+<script>
+    (function () {
+        var cb = null;
+        function token() {
+            var el = document.querySelector('input[name="__RequestVerificationToken"]');
+            return el ? el.value : '';
+        }
+        function isImage(url) { return /\.(jpe?g|png|webp|svg|ico|avif|gif)$/i.test(url); }
+
+        window.openMediaPicker = function (callback) {
+            cb = callback;
+            document.getElementById('mediaPicker').classList.remove('hidden');
+            loadGrid();
+        };
+        window.closeMediaPicker = function () {
+            document.getElementById('mediaPicker').classList.add('hidden');
+            cb = null;
+        };
+
+        function loadGrid() {
+            var grid = document.getElementById('mpGrid');
+            grid.innerHTML = '<p class="col-span-full text-sm text-slate-400">Yükleniyor…</p>';
+            fetch('/Admin/Media/List').then(function (r) { return r.json(); }).then(function (items) {
+                if (!items.length) { grid.innerHTML = '<p class="col-span-full text-sm text-slate-400">Henüz dosya yok. Yukarıdan yükleyin.</p>'; return; }
+                grid.innerHTML = '';
+                items.forEach(function (m) {
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'group overflow-hidden rounded-lg border border-slate-200 bg-white hover:border-brand';
+                    var inner = isImage(m.url)
+                        ? '<div class="flex h-24 items-center justify-center bg-slate-50 p-1"><img src="' + m.url + '" class="max-h-full max-w-full object-contain"></div>'
+                        : '<div class="flex h-24 items-center justify-center bg-slate-50 text-slate-400"><span class="text-xs font-semibold uppercase">' + m.name.split('.').pop() + '</span></div>';
+                    b.innerHTML = inner + '<p class="truncate px-1 py-1 text-[10px] text-slate-500">' + m.name + '</p>';
+                    b.onclick = function () { if (cb) cb(m.url); closeMediaPicker(); };
+                    grid.appendChild(b);
+                });
+            });
+        }
+
+        window.mpUpload = function () {
+            var input = document.getElementById('mpUploadInput');
+            var msg = document.getElementById('mpUploadMsg');
+            if (!input.files || !input.files.length) { msg.textContent = 'Önce dosya seçin.'; return; }
+            var fd = new FormData();
+            fd.append('file', input.files[0]);
+            fd.append('folder', 'general');
+            fd.append('__RequestVerificationToken', token());
+            msg.textContent = 'Yükleniyor…';
+            fetch('/Admin/Media/UploadAjax', { method: 'POST', body: fd })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res.url) { msg.textContent = 'Yüklendi.'; input.value = ''; loadGrid(); }
+                    else { msg.textContent = res.error || 'Hata.'; }
+                })
+                .catch(function () { msg.textContent = 'Yükleme hatası.'; });
+        };
+    })();
+</script>

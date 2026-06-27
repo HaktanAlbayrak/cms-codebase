@@ -1,0 +1,26 @@
+@model PageVm
+
+<section class="border-b border-slate-100 bg-slate-50">
+    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+        <nav class="mb-4 text-sm text-slate-400">
+            <a href="@CultureContext.LocalizedPath("/")" class="hover:text-brand">@Localizer["common.home"]</a>
+            <span class="mx-1">/</span>
+            <span class="text-slate-600">@Model.Title</span>
+        </nav>
+        <h1 class="font-display text-3xl font-extrabold text-ink sm:text-4xl">@Model.Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.Lead))
+        {
+            <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-500">@Model.Lead</p>
+        }
+    </div>
+</section>
+
+<article class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl))
+    {
+        <img src="@Model.CoverImageUrl" alt="@Model.Title" class="mb-8 w-full rounded-2xl object-cover" />
+    }
+    <div class="prose prose-slate max-w-none">
+        @Html.Raw(Model.Body)
+    </div>
+</article>

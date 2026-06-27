@@ -1,0 +1,117 @@
+@model SlideEditModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Yeni Slayt" : "Slayt Düzenle";
+    var languages = ViewBag.Languages as List<Language> ?? new();
+}
+
+<partial name="_PageHelp" model="@("Masaüstü görseli zorunlu, mobil görsel opsiyoneldir. CTA, buton metni ve gittiği adrestir (ör. /contact veya https://...).")" />
+
+<form method="post" action="/Admin/Slides/Edit" enctype="multipart/form-data" class="space-y-6">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ImageDesktop" id="ImageDesktop" value="@Model.ImageDesktop" />
+    <input type="hidden" name="ImageMobile" id="ImageMobile" value="@Model.ImageMobile" />
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="space-y-5 lg:col-span-2">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <div class="mb-4 flex gap-2 border-b border-slate-200">
+                    @for (var i = 0; i < languages.Count; i++)
+                    {
+                        var lang = languages[i];
+                        <button type="button" class="lang-tab -mb-px border-b-2 px-4 py-2 text-sm font-semibold @(i == 0 ? "border-brand text-brand" : "border-transparent text-slate-400")" data-lang="@lang.Code" onclick="showLang('@lang.Code', this)">
+                            @lang.Name @(lang.IsDefault ? "★" : "")
+                        </button>
+                    }
+                </div>
+
+                @for (var i = 0; i < languages.Count; i++)
+                {
+                    var code = languages[i].Code;
+                    <div class="lang-pane space-y-4 @(i == 0 ? "" : "hidden")" data-lang-pane="@code">
+                        <div>
+                            <label class="form-label">Üst Etiket / Kicker (@code)</label>
+                            <input class="form-input" name="Kicker[@code]" value="@(Model.Kicker.TryGetValue(code, out var k) ? k : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">Başlık (@code)</label>
+                            <input class="form-input" name="Title[@code]" value="@(Model.Title.TryGetValue(code, out var ti) ? ti : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">Alt Metin (@code)</label>
+                            <textarea class="form-input" name="Subtitle[@code]" rows="2">@(Model.Subtitle.TryGetValue(code, out var su) ? su : "")</textarea>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="form-label">Buton Metni (@code)</label>
+                                <input class="form-input" name="CtaText[@code]" value="@(Model.CtaText.TryGetValue(code, out var ct) ? ct : "")" />
+                            </div>
+                            <div>
+                                <label class="form-label">Buton Adresi (@code)</label>
+                                <input class="form-input" name="CtaUrl[@code]" value="@(Model.CtaUrl.TryGetValue(code, out var cu) ? cu : "")" placeholder="/contact" />
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 text-sm font-bold text-ink">Masaüstü Görseli *</h3>
+                <div id="dPreview" class="mb-3 @(string.IsNullOrWhiteSpace(Model.ImageDesktop) ? "hidden" : "")">
+                    <img src="@Model.ImageDesktop" class="w-full rounded-lg border border-slate-200" />
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn-outline !text-xs" onclick="pick('ImageDesktop','dPreview')"><i data-lucide="image" class="h-4 w-4"></i>Medyadan Seç</button>
+                    <input type="file" name="desktopFile" accept="image/*" class="text-xs" />
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 text-sm font-bold text-ink">Mobil Görseli</h3>
+                <div id="mPreview" class="mb-3 @(string.IsNullOrWhiteSpace(Model.ImageMobile) ? "hidden" : "")">
+                    <img src="@Model.ImageMobile" class="w-full rounded-lg border border-slate-200" />
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" class="btn-outline !text-xs" onclick="pick('ImageMobile','mPreview')"><i data-lucide="image" class="h-4 w-4"></i>Medyadan Seç</button>
+                    <input type="file" name="mobileFile" accept="image/*" class="text-xs" />
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+                <div>
+                    <label class="form-label">Sıra</label>
+                    <input class="form-input" name="SortOrder" type="number" value="@Model.SortOrder" />
+                </div>
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") class="h-4 w-4 rounded border-slate-300" />
+                    Aktif
+                </label>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn-brand flex-1">Kaydet</button>
+                <a href="/Admin/Slides" class="btn-outline">İptal</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function showLang(code, btn) {
+            document.querySelectorAll('[data-lang-pane]').forEach(function (p) { p.classList.toggle('hidden', p.getAttribute('data-lang-pane') !== code); });
+            document.querySelectorAll('.lang-tab').forEach(function (t) { t.classList.remove('border-brand', 'text-brand'); t.classList.add('border-transparent', 'text-slate-400'); });
+            btn.classList.add('border-brand', 'text-brand'); btn.classList.remove('border-transparent', 'text-slate-400');
+        }
+        function pick(inputId, previewId) {
+            openMediaPicker(function (url) {
+                document.getElementById(inputId).value = url;
+                var p = document.getElementById(previewId);
+                p.classList.remove('hidden');
+                p.querySelector('img').src = url;
+            });
+        }
+    </script>
+}

@@ -1,0 +1,146 @@
+@model PageEditModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Yeni Sayfa" : "Sayfa Düzenle";
+    var languages = ViewBag.Languages as List<Language> ?? new();
+    var layouts = new (string Key, string Label, string Desc)[]
+    {
+        ("standard", "Standart", "Ortalanmış başlık + içerik (genel sayfalar)."),
+        ("wide", "Geniş Kapak", "Tam genişlik kapak görseli + geniş içerik."),
+    };
+}
+
+<partial name="_PageHelp" model="@("Her dil için ayrı sekmede içerik girin. Boş bıraktığınız diller, site ziyaretinde varsayılan dile düşer. Şablonu değiştirince önizleme güncellenir.")" />
+
+<form method="post" action="/Admin/Pages/Edit" enctype="multipart/form-data" class="space-y-6">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="CoverImageUrl" id="CoverImageUrl" value="@Model.CoverImageUrl" />
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="space-y-5 lg:col-span-2">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <div class="mb-4 flex gap-2 border-b border-slate-200">
+                    @for (var i = 0; i < languages.Count; i++)
+                    {
+                        var lang = languages[i];
+                        <button type="button" class="lang-tab -mb-px border-b-2 px-4 py-2 text-sm font-semibold @(i == 0 ? "border-brand text-brand" : "border-transparent text-slate-400")" data-lang="@lang.Code" onclick="showLang('@lang.Code', this)">
+                            @lang.Name @(lang.IsDefault ? "★" : "")
+                        </button>
+                    }
+                </div>
+
+                @for (var i = 0; i < languages.Count; i++)
+                {
+                    var lang = languages[i];
+                    var code = lang.Code;
+                    <div class="lang-pane space-y-4 @(i == 0 ? "" : "hidden")" data-lang-pane="@code">
+                        <div>
+                            <label class="form-label">Başlık (@code)</label>
+                            <input class="form-input" name="Title[@code]" value="@(Model.Title.TryGetValue(code, out var ti) ? ti : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">Kısa Açıklama / Lead (@code)</label>
+                            <input class="form-input" name="Lead[@code]" value="@(Model.Lead.TryGetValue(code, out var le) ? le : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">İçerik (@code)</label>
+                            <textarea class="form-input ck" name="Body[@code]" rows="10">@(Model.Body.TryGetValue(code, out var bo) ? bo : "")</textarea>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="form-label">SEO Başlık (@code)</label>
+                                <input class="form-input" name="MetaTitle[@code]" value="@(Model.MetaTitle.TryGetValue(code, out var mt) ? mt : "")" />
+                            </div>
+                            <div>
+                                <label class="form-label">SEO Açıklama (@code)</label>
+                                <input class="form-input" name="MetaDescription[@code]" value="@(Model.MetaDescription.TryGetValue(code, out var md) ? md : "")" />
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-4 text-sm font-bold text-ink">Yayın</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="form-label">Slug (URL adı)</label>
+                        <input class="form-input" name="Slug" value="@Model.Slug" placeholder="hakkimizda" required />
+                        <p class="mt-1 text-xs text-slate-400">Adres: /tr/<span id="slugPreview">@Model.Slug</span></p>
+                    </div>
+                    <div>
+                        <label class="form-label">Şablon</label>
+                        <select class="form-input" name="LayoutKey" id="layoutSelect" onchange="updateLayoutPreview()">
+                            @foreach (var l in layouts)
+                            {
+                                <option value="@l.Key" selected="@(Model.LayoutKey == l.Key)">@l.Label</option>
+                            }
+                        </select>
+                        <p id="layoutDesc" class="mt-1 text-xs text-slate-400"></p>
+                    </div>
+                    <div>
+                        <label class="form-label">Sıra</label>
+                        <input class="form-input" name="SortOrder" type="number" value="@Model.SortOrder" />
+                    </div>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") class="h-4 w-4 rounded border-slate-300" />
+                        Yayında
+                    </label>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 text-sm font-bold text-ink">Kapak Görseli</h3>
+                <div id="coverPreview" class="mb-3 @(string.IsNullOrWhiteSpace(Model.CoverImageUrl) ? "hidden" : "")">
+                    <img src="@Model.CoverImageUrl" class="w-full rounded-lg border border-slate-200 object-cover" />
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" class="btn-outline !text-xs" onclick="openMediaPicker(function(url){ document.getElementById('CoverImageUrl').value=url; var p=document.getElementById('coverPreview'); p.classList.remove('hidden'); p.querySelector('img').src=url; })">
+                        <i data-lucide="image" class="h-4 w-4"></i>Medyadan Seç
+                    </button>
+                    <input type="file" name="coverFile" accept="image/*" class="text-xs" />
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn-brand flex-1">Kaydet</button>
+                <a href="/Admin/Pages" class="btn-outline">İptal</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        var layoutData = {
+            standard: "@layouts[0].Desc",
+            wide: "@layouts[1].Desc"
+        };
+        function showLang(code, btn) {
+            document.querySelectorAll('[data-lang-pane]').forEach(function (p) { p.classList.toggle('hidden', p.getAttribute('data-lang-pane') !== code); });
+            document.querySelectorAll('.lang-tab').forEach(function (t) { t.classList.remove('border-brand', 'text-brand'); t.classList.add('border-transparent', 'text-slate-400'); });
+            btn.classList.add('border-brand', 'text-brand'); btn.classList.remove('border-transparent', 'text-slate-400');
+        }
+        function updateLayoutPreview() {
+            var key = document.getElementById('layoutSelect').value;
+            document.getElementById('layoutDesc').textContent = layoutData[key] || '';
+        }
+        var slugInput = document.querySelector('input[name="Slug"]');
+        if (slugInput) slugInput.addEventListener('input', function () { document.getElementById('slugPreview').textContent = this.value; });
+        updateLayoutPreview();
+
+        if (window.CKEDITOR) {
+            CKEDITOR.replaceClass = 'ck';
+            CKEDITOR.editorConfig = function (config) {
+                config.filebrowserUploadUrl = '/Admin/Media/CkUpload';
+                config.filebrowserUploadMethod = 'form';
+            };
+            document.querySelectorAll('textarea.ck').forEach(function (ta) {
+                CKEDITOR.replace(ta, { filebrowserUploadUrl: '/Admin/Media/CkUpload', filebrowserUploadMethod: 'form' });
+            });
+        }
+    </script>
+}

@@ -1,0 +1,58 @@
+@model List<MediaItem>
+@{
+    ViewData["Title"] = "Medya Kütüphanesi";
+    var folders = ViewBag.Folders as List<string> ?? new();
+    var selected = ViewBag.SelectedFolder as string;
+    bool IsImage(string url) => System.Text.RegularExpressions.Regex.IsMatch(url, @"\.(jpe?g|png|webp|svg|ico|avif|gif)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+}
+
+<partial name="_PageHelp" model="@("Sitede kullanılan tüm görsel, video ve PDF'ler burada toplanır. Bir kez yüklediğiniz dosyayı her alanda 'Medyadan Seç' ile yeniden kullanabilirsiniz.")" />
+
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap gap-2">
+        <a href="/Admin/Media" class="rounded-lg px-3 py-1.5 text-sm @(string.IsNullOrEmpty(selected) ? "bg-brand text-white" : "bg-white text-slate-600 border border-slate-200")">Tümü</a>
+        @foreach (var f in folders)
+        {
+            <a href="/Admin/Media?folder=@f" class="rounded-lg px-3 py-1.5 text-sm @(selected == f ? "bg-brand text-white" : "bg-white text-slate-600 border border-slate-200")">@f</a>
+        }
+    </div>
+    <form method="post" action="/Admin/Media/Upload" enctype="multipart/form-data" class="flex items-center gap-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="folder" value="general" />
+        <input type="file" name="file" accept="image/*,video/*,application/pdf" class="text-xs" required />
+        <button type="submit" class="btn-brand !px-3 !py-1.5 !text-xs">Yükle</button>
+    </form>
+</div>
+
+<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    @foreach (var m in Model)
+    {
+        <div class="group overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div class="flex h-28 items-center justify-center bg-slate-50 p-1">
+                @if (IsImage(m.Url))
+                {
+                    <img src="@m.Url" class="max-h-full max-w-full object-contain" />
+                }
+                else
+                {
+                    <span class="text-xs font-bold uppercase text-slate-400">@System.IO.Path.GetExtension(m.Name).TrimStart('.')</span>
+                }
+            </div>
+            <div class="p-2">
+                <p class="truncate text-[11px] text-slate-500" title="@m.Name">@m.Name</p>
+                <div class="mt-1 flex items-center justify-between">
+                    <button type="button" onclick="navigator.clipboard.writeText('@m.Url')" class="text-[10px] text-slate-400 hover:text-brand">Kopyala</button>
+                    <form method="post" action="/Admin/Media/Delete" onsubmit="return confirm('Dosya silinsin mi?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="webPath" value="@m.Url" />
+                        <button type="submit" class="text-slate-400 hover:text-red-600"><i data-lucide="trash-2" class="h-3.5 w-3.5"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    @if (Model.Count == 0)
+    {
+        <p class="col-span-full py-8 text-center text-sm text-slate-400">Henüz dosya yok.</p>
+    }
+</div>

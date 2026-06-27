@@ -1,0 +1,14 @@
+@model PageVm
+@{
+    ViewData["Title"] = Model.MetaTitle;
+    ViewData["MetaDescription"] = Model.MetaDescription;
+}
+@switch (Model.LayoutKey)
+{
+    case "wide":
+        await Html.RenderPartialAsync("Layouts/wide", Model);
+        break;
+    default:
+        await Html.RenderPartialAsync("Layouts/standard", Model);
+        break;
+}

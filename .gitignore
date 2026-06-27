@@ -1,0 +1,27 @@
+# ── .NET build çıktıları ──
+bin/
+obj/
+*.user
+
+# ── IDE ──
+.vs/
+.vscode/
+.idea/
+*.suo
+
+# ── SQLite çalışma dosyaları (tohum kodla üretilir; veriyi taşıma) ──
+*.db
+*.db-shm
+*.db-wal
+
+# ── Node / Tailwind ──
+node_modules/
+
+# ── Loglar & geçici ──
+*.log
+*.tmp
+[Tt]emp/
+
+# ── Çalışma zamanında yüklenen medya (tohumlanan içerik takip edilir, kullanıcı yüklemesi edilmez) ──
+wwwroot/uploads/icerik/
+wwwroot/uploads/general/

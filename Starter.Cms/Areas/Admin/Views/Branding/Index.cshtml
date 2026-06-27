@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Marka & Tema";
+    var s = ViewBag.Settings as IDictionary<string, string> ?? new Dictionary<string, string>();
+    string V(string key, string def = "") => s.TryGetValue(key, out var v) && !string.IsNullOrWhiteSpace(v) ? v : def;
+}
+
+<partial name="_PageHelp" model="@("Sitenizin kimliği: logo, renk, iletişim ve sosyal medya. Buradaki her şey sitede anında yansır — sabit (statik) hiçbir değer yoktur.")" />
+
+<form method="post" action="/Admin/Branding/Index" enctype="multipart/form-data" class="space-y-6">
+    @Html.AntiForgeryToken()
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            <h3 class="text-sm font-bold text-ink">Marka</h3>
+            <div>
+                <label class="form-label">Firma Adı</label>
+                <input class="form-input" name="values[branding.companyName]" value="@V("branding.companyName")" />
+            </div>
+            @{
+                var logos = new (string Key, string Label)[] { ("branding.logoUrl", "Logo (açık zemin)"), ("branding.logoLightUrl", "Logo (koyu zemin / footer)"), ("branding.faviconUrl", "Favicon") };
+                var fileNames = new[] { "logoFile", "logoLightFile", "faviconFile" };
+            }
+            @for (var i = 0; i < logos.Length; i++)
+            {
+                var key = logos[i].Key;
+                <div>
+                    <label class="form-label">@logos[i].Label</label>
+                    @if (!string.IsNullOrWhiteSpace(V(key)))
+                    {
+                        <img src="@V(key)" class="mb-2 h-12 rounded border border-slate-200 bg-slate-50 object-contain p-1" />
+                    }
+                    <input type="file" name="@fileNames[i]" accept="image/*" class="text-xs" />
+                </div>
+            }
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            <h3 class="text-sm font-bold text-ink">Tema Renkleri</h3>
+            @{
+                var colors = new (string Key, string Label, string Def)[]
+                {
+                    ("theme.primary", "Ana Renk", "#2563eb"),
+                    ("theme.primaryDark", "Ana Renk (Koyu)", "#1e40af"),
+                    ("theme.ink", "Metin Rengi", "#0f172a"),
+                };
+            }
+            @foreach (var c in colors)
+            {
+                <div class="flex items-center justify-between gap-3">
+                    <label class="form-label !mb-0">@c.Label</label>
+                    <input type="color" name="values[@c.Key]" value="@V(c.Key, c.Def)" class="h-10 w-16 cursor-pointer rounded border border-slate-300" />
+                </div>
+            }
+            <p class="text-xs text-slate-400">Renkler hem sitede hem panelde butonlar/vurgular için kullanılır.</p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            <h3 class="text-sm font-bold text-ink">İletişim</h3>
+            <div><label class="form-label">Telefon</label><input class="form-input" name="values[contact.phone]" value="@V("contact.phone")" dir="ltr" /></div>
+            <div><label class="form-label">E-posta</label><input class="form-input" name="values[contact.email]" value="@V("contact.email")" /></div>
+            <div><label class="form-label">WhatsApp No (sadece rakam)</label><input class="form-input" name="values[whatsapp.number]" value="@V("whatsapp.number")" dir="ltr" placeholder="905551112233" /></div>
+            <div><label class="form-label">Adres</label><input class="form-input" name="values[branding.address]" value="@V("branding.address")" /></div>
+            <div><label class="form-label">Çalışma Saatleri</label><input class="form-input" name="values[branding.workingHours]" value="@V("branding.workingHours")" /></div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            <h3 class="text-sm font-bold text-ink">Sosyal Medya & SEO</h3>
+            <div><label class="form-label">Facebook</label><input class="form-input" name="values[social.facebook]" value="@V("social.facebook")" dir="ltr" /></div>
+            <div><label class="form-label">Instagram</label><input class="form-input" name="values[social.instagram]" value="@V("social.instagram")" dir="ltr" /></div>
+            <div><label class="form-label">LinkedIn</label><input class="form-input" name="values[social.linkedin]" value="@V("social.linkedin")" dir="ltr" /></div>
+            <div><label class="form-label">YouTube</label><input class="form-input" name="values[social.youtube]" value="@V("social.youtube")" dir="ltr" /></div>
+            <div><label class="form-label">OG Görseli (sosyal paylaşım önizleme)</label><input class="form-input" name="values[seo.ogImageUrl]" value="@V("seo.ogImageUrl")" dir="ltr" placeholder="/uploads/branding/og.jpg" /></div>
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+        <button type="submit" class="btn-brand">Ayarları Kaydet</button>
+    </div>
+</form>
