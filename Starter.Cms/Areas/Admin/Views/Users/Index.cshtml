@@ -1,0 +1,132 @@
+@model UsersVm
+@{
+    ViewData["Title"] = "Kullanıcılar";
+}
+
+<partial name="_PageHelp" model="@("İki rol vardır: Admin her şeyi yönetir (kullanıcılar, marka, mail, diller dahil). İçerik Yöneticisi yalnızca Sayfalar, Slider, Medya ve Mesajlar bölümlerini düzenleyebilir. Kendi hesabınızı silemez veya pasifleştiremezsiniz; sistemde her zaman en az bir aktif admin kalır.")" />
+
+<div class="grid gap-6 lg:grid-cols-3">
+    <div class="lg:col-span-2">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                    <tr>
+                        <th class="px-5 py-3">Kullanıcı</th>
+                        <th class="px-5 py-3">Rol</th>
+                        <th class="px-5 py-3">Durum</th>
+                        <th class="px-5 py-3">Son Giriş</th>
+                        <th class="px-5 py-3 text-right">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var u in Model.Users)
+                    {
+                        var isSelf = u.Id == Model.CurrentUserId;
+                        <tr>
+                            <td class="px-5 py-3">
+                                <details>
+                                    <summary class="cursor-pointer font-medium text-ink">
+                                        @u.Username @(isSelf ? "(siz)" : "")
+                                        @if (!string.IsNullOrWhiteSpace(u.FullName))
+                                        {
+                                            <span class="text-xs font-normal text-slate-400">— @u.FullName</span>
+                                        }
+                                    </summary>
+                                    <form method="post" action="/Admin/Users/Save" class="mt-3 grid gap-3 sm:grid-cols-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@u.Id" />
+                                        <div><label class="form-label">Kullanıcı Adı</label><input class="form-input" name="username" value="@u.Username" required /></div>
+                                        <div><label class="form-label">Ad Soyad</label><input class="form-input" name="fullName" value="@u.FullName" /></div>
+                                        <div><label class="form-label">E-posta</label><input class="form-input" name="email" type="email" value="@u.Email" /></div>
+                                        <div>
+                                            <label class="form-label">Rol</label>
+                                            <select class="form-input" name="role" @(isSelf ? "disabled" : "")>
+                                                <option value="@((int)UserRole.ContentManager)" selected="@(u.Role == UserRole.ContentManager)">İçerik Yöneticisi</option>
+                                                <option value="@((int)UserRole.Admin)" selected="@(u.Role == UserRole.Admin)">Admin</option>
+                                            </select>
+                                            @if (isSelf)
+                                            {
+                                                <input type="hidden" name="role" value="@((int)u.Role)" />
+                                            }
+                                        </div>
+                                        <div>
+                                            <label class="form-label">Yeni Şifre <span class="text-slate-400">(boş = değişmez)</span></label>
+                                            <input class="form-input" name="password" type="text" autocomplete="new-password" placeholder="••••••••" />
+                                        </div>
+                                        <div class="flex items-end">
+                                            <label class="flex items-center gap-2 text-sm">
+                                                <input type="checkbox" name="isActive" value="true" @(u.IsActive ? "checked" : "") @(isSelf ? "disabled checked" : "") /> Aktif (giriş yapabilir)
+                                            </label>
+                                            @if (isSelf)
+                                            {
+                                                <input type="hidden" name="isActive" value="true" />
+                                            }
+                                        </div>
+                                        <div class="sm:col-span-2 flex items-center gap-3">
+                                            <button type="submit" class="btn-brand !text-xs">Kaydet</button>
+                                            <span class="text-xs text-slate-400">@PasswordPolicy.RuleText</span>
+                                        </div>
+                                    </form>
+                                </details>
+                            </td>
+                            <td class="px-5 py-3">
+                                @if (u.Role == UserRole.Admin)
+                                {
+                                    <span class="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">Admin</span>
+                                }
+                                else
+                                {
+                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">İçerik Yöneticisi</span>
+                                }
+                            </td>
+                            <td class="px-5 py-3">
+                                @if (u.IsActive)
+                                {
+                                    <span class="rounded-full bg-green-50 px-2 py-0.5 text-xs text-green-700">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">Pasif</span>
+                                }
+                            </td>
+                            <td class="px-5 py-3 text-xs text-slate-500">
+                                @(u.LastLoginAt is null ? "—" : u.LastLoginAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))
+                            </td>
+                            <td class="px-5 py-3 text-right">
+                                @if (!isSelf)
+                                {
+                                    <form method="post" action="/Admin/Users/Delete/@u.Id" onsubmit="return confirm('@u.Username kullanıcısı silinsin mi?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <form method="post" action="/Admin/Users/Save" class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+            @Html.AntiForgeryToken()
+            <h3 class="text-sm font-bold text-ink">Yeni Kullanıcı</h3>
+            <input type="hidden" name="id" value="0" />
+            <div><label class="form-label">Kullanıcı Adı</label><input class="form-input" name="username" required /></div>
+            <div><label class="form-label">Ad Soyad</label><input class="form-input" name="fullName" /></div>
+            <div><label class="form-label">E-posta</label><input class="form-input" name="email" type="email" /></div>
+            <div>
+                <label class="form-label">Rol</label>
+                <select class="form-input" name="role">
+                    <option value="@((int)UserRole.ContentManager)" selected>İçerik Yöneticisi</option>
+                    <option value="@((int)UserRole.Admin)">Admin</option>
+                </select>
+            </div>
+            <div><label class="form-label">Şifre</label><input class="form-input" name="password" type="text" autocomplete="new-password" required /></div>
+            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="isActive" value="true" checked /> Aktif</label>
+            <p class="text-xs text-slate-400">@PasswordPolicy.RuleText</p>
+            <button type="submit" class="btn-brand w-full"><i data-lucide="user-plus" class="h-4 w-4"></i>Kullanıcı Ekle</button>
+        </form>
+    </div>
+</div>

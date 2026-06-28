@@ -20,6 +20,7 @@ public class DashboardController : AdminControllerBase
             LanguageCount = await _db.Languages.CountAsync(),
             MessageCount = await _db.ContactMessages.CountAsync(),
             UnreadMessageCount = await _db.ContactMessages.CountAsync(m => !m.IsRead),
+            UserCount = await _db.Users.CountAsync(),
         };
         return View(vm);
     }

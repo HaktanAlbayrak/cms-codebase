@@ -1,13 +1,19 @@
 @model DashboardVm
 @{
     ViewData["Title"] = "Panel";
-    (string Label, int Count, string Icon, string Url)[] cards =
+    var isAdmin = User.IsInRole(Roles.Admin);
+    var cards = new List<(string Label, int Count, string Icon, string Url)>
     {
         ("Sayfalar", Model.PageCount, "file-text", "/Admin/Pages"),
         ("Slaytlar", Model.SlideCount, "images", "/Admin/Slides"),
-        ("Diller", Model.LanguageCount, "languages", "/Admin/Languages"),
         ("Mesajlar", Model.MessageCount, "inbox", "/Admin/Messages"),
     };
+    // Admin'e özel kartlar (içerik yöneticisi bu bölümleri göremez).
+    if (isAdmin)
+    {
+        cards.Add(("Diller", Model.LanguageCount, "languages", "/Admin/Languages"));
+        cards.Add(("Kullanıcılar", Model.UserCount, "users", "/Admin/Users"));
+    }
 }
 
 <partial name="_PageHelp" model="@("Hoş geldiniz. Soldaki menüden içerikleri yönetebilirsiniz. Tüm metinler, görseller, logo, renk ve e-posta ayarları buradan değiştirilir — sitede sabit (statik) hiçbir içerik yoktur.")" />

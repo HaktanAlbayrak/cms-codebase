@@ -23,6 +23,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
     public DbSet<MediaAssetTranslation> MediaAssetTranslations => Set<MediaAssetTranslation>();
+    public DbSet<AppUser> Users => Set<AppUser>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -34,6 +35,7 @@ public class ApplicationDbContext : DbContext
         b.Entity<Page>().HasIndex(x => x.Slug).IsUnique();
         b.Entity<LocalizationResource>().HasIndex(x => new { x.Key, x.LanguageCode }).IsUnique();
         b.Entity<MediaAsset>().HasIndex(x => x.Url).IsUnique();
+        b.Entity<AppUser>().HasIndex(x => x.Username).IsUnique();
 
         // Aynı dilde iki çeviri olmasın.
         b.Entity<PageTranslation>().HasIndex(x => new { x.PageId, x.LanguageCode }).IsUnique();

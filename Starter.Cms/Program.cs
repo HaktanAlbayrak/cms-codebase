@@ -37,7 +37,7 @@ builder.Services.AddScoped<IPageService, PageService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
-builder.Services.AddSingleton<IAdminAuthService, AdminAuthService>();
+builder.Services.AddScoped<IAdminAuthService, AdminAuthService>();
 
 // ── SMTP / e-posta (ayarlar DB'den · SiteSettings smtp.* okunur) ──
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
@@ -66,7 +66,7 @@ builder.Services.AddAuthentication(IAdminAuthService.Scheme)
     .AddCookie(IAdminAuthService.Scheme, o =>
     {
         o.LoginPath = "/admin/account/login";
-        o.AccessDeniedPath = "/admin/account/login";
+        o.AccessDeniedPath = "/admin/account/denied";
         o.Cookie.Name = "StarterCmsAdmin";
         o.SlidingExpiration = true;
     });
@@ -86,7 +86,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
-    await DbSeeder.SeedAsync(db);
+    await DbSeeder.SeedAsync(db, app.Configuration);
 
     // wwwroot/uploads altındaki mevcut dosyaları medya kütüphanesine içeri aktar (idempotent).
     await scope.ServiceProvider.GetRequiredService<IMediaService>().ImportExistingFilesAsync();

@@ -35,6 +35,23 @@ public static class AdminMessages
     public const string TranslationsSaved = "Çeviriler kaydedildi.";
     public const string InvalidCredentials = "Kullanıcı adı veya şifre hatalı.";
 
+    public const string UserCreated = "Kullanıcı oluşturuldu.";
+    public const string UserUpdated = "Kullanıcı güncellendi.";
+    public const string UserDeleted = "Kullanıcı silindi.";
+    public const string UserPasswordReset = "Kullanıcının şifresi güncellendi.";
+    public const string UsernameRequired = "Kullanıcı adı zorunludur.";
+    public const string UsernameTaken = "Bu kullanıcı adı zaten kullanılıyor.";
+    public const string PasswordRequired = "Yeni kullanıcı için şifre zorunludur.";
+    public const string CannotDeleteSelf = "Kendi hesabınızı silemezsiniz.";
+    public const string CannotChangeOwnRole = "Kendi rolünüzü değiştiremezsiniz.";
+    public const string CannotDeactivateSelf = "Kendi hesabınızı pasifleştiremezsiniz.";
+    public const string LastAdminProtected = "Sistemde en az bir aktif admin kalmalıdır.";
+
+    public const string ProfileUpdated = "Profil bilgileriniz güncellendi.";
+    public const string PasswordChanged = "Şifreniz değiştirildi.";
+    public const string CurrentPasswordWrong = "Mevcut şifreniz hatalı.";
+    public const string PasswordsDoNotMatch = "Yeni şifre ve tekrarı eşleşmiyor.";
+
     public static string MailTestSent(string? email) =>
         $"Test e-postası gönderildi{(string.IsNullOrWhiteSpace(email) ? "" : $": {email}")}. " +
         "Gelen kutusunu (ve spam klasörünü) kontrol edin.";

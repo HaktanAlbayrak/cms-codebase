@@ -1,11 +1,15 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
+using Starter.Cms.Data;
+using Starter.Cms.Domain;
 
 namespace Starter.Cms.Services;
 
 /// <summary>
 /// Admin oturum yönetimi. Controller'lar HttpContext'e doğrudan değil bu servise
-/// bağımlıdır (aracı oturum servisi). Kullanıcı adı/şifre appsettings.json'dan okunur.
+/// bağımlıdır (aracı oturum servisi). Kullanıcılar veritabanından doğrulanır; şifreler
+/// PBKDF2 ile hash'lenir. Pasif (IsActive=false) kullanıcılar giriş yapamaz.
 /// </summary>
 public interface IAdminAuthService
 {
@@ -16,21 +20,27 @@ public interface IAdminAuthService
 
 public class AdminAuthService : IAdminAuthService
 {
-    private readonly string _username;
-    private readonly string _password;
+    private readonly ApplicationDbContext _db;
 
-    public AdminAuthService(IConfiguration config)
-    {
-        _username = config["Admin:Username"] ?? "admin";
-        _password = config["Admin:Password"] ?? "admin123";
-    }
+    public AdminAuthService(ApplicationDbContext db) => _db = db;
 
     public async Task<bool> SignInAsync(HttpContext http, string username, string password)
     {
-        if (!string.Equals(username, _username, StringComparison.OrdinalIgnoreCase) || password != _password)
+        username = (username ?? "").Trim();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == username);
+        if (user is null || !user.IsActive || !PasswordHasher.Verify(password, user.PasswordHash))
             return false;
 
-        var claims = new List<Claim> { new(ClaimTypes.Name, username), new(ClaimTypes.Role, "Admin") };
+        user.LastLoginAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.Username),
+            new(ClaimTypes.GivenName, user.FullName),
+            new(ClaimTypes.Role, user.Role.ToString())
+        };
         var identity = new ClaimsIdentity(claims, IAdminAuthService.Scheme);
         await http.SignInAsync(IAdminAuthService.Scheme, new ClaimsPrincipal(identity),
             new AuthenticationProperties { IsPersistent = true });

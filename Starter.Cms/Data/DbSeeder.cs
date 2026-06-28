@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Starter.Cms.Domain;
+using Starter.Cms.Services;
 
 namespace Starter.Cms.Data;
 
@@ -14,7 +15,7 @@ public static class DbSeeder
     private const string Hero1 = "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop";
     private const string Hero2 = "https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1600&auto=format&fit=crop";
 
-    public static async Task SeedAsync(ApplicationDbContext db)
+    public static async Task SeedAsync(ApplicationDbContext db, IConfiguration? config = null)
     {
         await SeedLanguagesAsync(db);
         await SeedLocalizationAsync(db);
@@ -22,6 +23,28 @@ public static class DbSeeder
         await SeedMenuAsync(db);
         await SeedSlidesAsync(db);
         await SeedPagesAsync(db);
+        await SeedUsersAsync(db, config);
+        await db.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// İlk açılışta varsayılan admin kullanıcısını oluşturur (appsettings.json'daki
+    /// <c>Admin:Username</c>/<c>Admin:Password</c> tohum olarak kullanılır). Tabloda kullanıcı
+    /// varsa dokunmaz — şifreler artık panelden yönetilir, appsettings yalnızca ilk tohumdur.
+    /// </summary>
+    private static async Task SeedUsersAsync(ApplicationDbContext db, IConfiguration? config)
+    {
+        if (await db.Users.AnyAsync()) return;
+        var username = config?["Admin:Username"] ?? "admin";
+        var password = config?["Admin:Password"] ?? "admin123";
+        db.Users.Add(new AppUser
+        {
+            Username = username.Trim(),
+            FullName = "Yönetici",
+            Email = "",
+            Role = UserRole.Admin,
+            PasswordHash = PasswordHasher.Hash(password)
+        });
         await db.SaveChangesAsync();
     }
 

@@ -1,3 +1,5 @@
+using Starter.Cms.Domain;
+
 namespace Starter.Cms.Areas.Admin.Models;
 
 /// <summary>Panel ana sayfası özet sayıları.</summary>
@@ -8,6 +10,14 @@ public class DashboardVm
     public int LanguageCount { get; init; }
     public int MessageCount { get; init; }
     public int UnreadMessageCount { get; init; }
+    public int UserCount { get; init; }
+}
+
+/// <summary>Kullanıcılar sayfası: liste + giriş yapan kullanıcının kimliği (kendini silmeyi/rol değiştirmeyi engellemek için).</summary>
+public class UsersVm
+{
+    public List<AppUser> Users { get; init; } = new();
+    public int CurrentUserId { get; init; }
 }
 
 /// <summary>Medya metadata düzenleme formu. Çeviri alanları dil-koduyla sözlüklenir.</summary>

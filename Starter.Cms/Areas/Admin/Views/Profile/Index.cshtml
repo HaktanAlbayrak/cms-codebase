@@ -1,0 +1,33 @@
+@model AppUser
+@{
+    ViewData["Title"] = "Profilim";
+    var roleLabel = Model.Role == UserRole.Admin ? "Admin" : "İçerik Yöneticisi";
+}
+
+<div class="grid max-w-3xl gap-6 lg:grid-cols-2">
+    <form method="post" action="/Admin/Profile/Save" class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+        @Html.AntiForgeryToken()
+        <h3 class="text-sm font-bold text-ink">Hesap Bilgileri</h3>
+        <div>
+            <label class="form-label">Kullanıcı Adı</label>
+            <input class="form-input bg-slate-50 text-slate-500" value="@Model.Username" disabled />
+        </div>
+        <div>
+            <label class="form-label">Rol</label>
+            <input class="form-input bg-slate-50 text-slate-500" value="@roleLabel" disabled />
+        </div>
+        <div><label class="form-label">Ad Soyad</label><input class="form-input" name="fullName" value="@Model.FullName" /></div>
+        <div><label class="form-label">E-posta</label><input class="form-input" name="email" type="email" value="@Model.Email" /></div>
+        <button type="submit" class="btn-brand w-full">Kaydet</button>
+    </form>
+
+    <form method="post" action="/Admin/Profile/ChangePassword" class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
+        @Html.AntiForgeryToken()
+        <h3 class="text-sm font-bold text-ink">Şifre Değiştir</h3>
+        <div><label class="form-label">Mevcut Şifre</label><input class="form-input" name="currentPassword" type="password" autocomplete="current-password" required /></div>
+        <div><label class="form-label">Yeni Şifre</label><input class="form-input" name="newPassword" type="password" autocomplete="new-password" required /></div>
+        <div><label class="form-label">Yeni Şifre (Tekrar)</label><input class="form-input" name="confirmPassword" type="password" autocomplete="new-password" required /></div>
+        <p class="text-xs text-slate-400">@PasswordPolicy.RuleText</p>
+        <button type="submit" class="btn-brand w-full">Şifreyi Güncelle</button>
+    </form>
+</div>

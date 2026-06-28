@@ -8,7 +8,7 @@ using Starter.Cms.Services;
 namespace Starter.Cms.Areas.Admin.Controllers;
 
 /// <summary>Dil yönetimi. Yeni dil eklendiğinde arayüz metinleri varsayılan dilden tohumlanır.</summary>
-public class LanguagesController : AdminControllerBase
+public class LanguagesController : AdminOnlyControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly IContentCache _cache;

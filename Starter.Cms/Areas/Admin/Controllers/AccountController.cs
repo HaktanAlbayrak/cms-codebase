@@ -39,4 +39,12 @@ public class AccountController : Controller
         await _auth.SignOutAsync(HttpContext);
         return RedirectToAction(nameof(Login));
     }
+
+    // Content Manager, admin'e özel bir sayfaya eriştiğinde (403) buraya yönlenir.
+    [HttpGet]
+    public IActionResult Denied()
+    {
+        Response.StatusCode = StatusCodes.Status403Forbidden;
+        return View();
+    }
 }

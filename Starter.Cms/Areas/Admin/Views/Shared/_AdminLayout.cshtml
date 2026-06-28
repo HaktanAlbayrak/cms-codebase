@@ -4,18 +4,24 @@
     var brandChannels = ColorUtil.ToRgbChannels(brand.ColorPrimary);
     var brandDarkChannels = ColorUtil.ToRgbChannels(brand.ColorPrimaryDark);
     var controller = (ViewContext.RouteData.Values["controller"] as string ?? "").ToLowerInvariant();
+    var isAdmin = User.IsInRole(Roles.Admin);
+    var userName = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value;
+    if (string.IsNullOrWhiteSpace(userName)) userName = User.Identity?.Name;
+    var roleLabel = isAdmin ? "Admin" : "İçerik Yöneticisi";
 
-    (string Ctrl, string Icon, string Label)[] nav =
+    // AdminOnly=true olan bölümler yalnızca Admin rolüne gösterilir.
+    (string Ctrl, string Icon, string Label, bool AdminOnly)[] nav =
     {
-        ("dashboard", "layout-dashboard", "Panel"),
-        ("pages", "file-text", "Sayfalar"),
-        ("slides", "images", "Slider"),
-        ("media", "image", "Medya Kütüphanesi"),
-        ("messages", "inbox", "Mesajlar"),
-        ("branding", "palette", "Marka & Tema"),
-        ("mail", "mail", "E-posta (SMTP)"),
-        ("languages", "languages", "Diller"),
-        ("localization", "type", "Arayüz Metinleri"),
+        ("dashboard", "layout-dashboard", "Panel", false),
+        ("pages", "file-text", "Sayfalar", false),
+        ("slides", "images", "Slider", false),
+        ("media", "image", "Medya Kütüphanesi", false),
+        ("messages", "inbox", "Mesajlar", false),
+        ("branding", "palette", "Marka & Tema", true),
+        ("mail", "mail", "E-posta (SMTP)", true),
+        ("languages", "languages", "Diller", true),
+        ("localization", "type", "Arayüz Metinleri", true),
+        ("users", "users", "Kullanıcılar", true),
     };
 }
 <!DOCTYPE html>
@@ -37,8 +43,9 @@
                 <p class="mt-0.5 text-xs text-slate-500">Yönetim Paneli</p>
             </div>
             <nav class="flex-1 space-y-1 p-3">
-                @foreach (var (ctrl, icon, label) in nav)
+                @foreach (var (ctrl, icon, label, adminOnly) in nav)
                 {
+                    if (adminOnly && !isAdmin) { continue; }
                     var active = controller == ctrl;
                     <a href="/Admin/@(ctrl == "dashboard" ? "Dashboard" : char.ToUpper(ctrl[0]) + ctrl[1..])"
                        class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition @(active ? "bg-brand text-white" : "text-slate-400 hover:bg-white/5 hover:text-white")">
@@ -47,6 +54,18 @@
                 }
             </nav>
             <div class="border-t border-white/10 p-3">
+                <div class="mb-2 flex items-center gap-3 rounded-lg px-3 py-2">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/20 text-xs font-bold text-white">
+                        @(string.IsNullOrWhiteSpace(userName) ? "?" : char.ToUpper(userName[0]).ToString())
+                    </span>
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-white">@userName</p>
+                        <p class="text-xs text-slate-500">@roleLabel</p>
+                    </div>
+                </div>
+                <a href="/Admin/Profile" class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm @(controller == "profile" ? "bg-brand text-white" : "text-slate-400 hover:bg-white/5 hover:text-white")">
+                    <i data-lucide="user-cog" class="h-4 w-4"></i>Profilim
+                </a>
                 <a href="/" target="_blank" class="mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-white/5 hover:text-white">
                     <i data-lucide="external-link" class="h-4 w-4"></i>Siteyi Gör
                 </a>

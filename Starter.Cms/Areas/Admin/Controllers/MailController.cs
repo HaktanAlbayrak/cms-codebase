@@ -4,7 +4,7 @@ using Starter.Cms.Services;
 namespace Starter.Cms.Areas.Admin.Controllers;
 
 /// <summary>SMTP / e-posta ayarları (DB'den), mail şablonu ve test e-postası gönderme.</summary>
-public class MailController : AdminControllerBase
+public class MailController : AdminOnlyControllerBase
 {
     private readonly IBrandingService _branding;
     private readonly ISiteSettingService _settings;

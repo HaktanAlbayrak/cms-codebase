@@ -7,7 +7,7 @@ using Starter.Cms.Localization;
 namespace Starter.Cms.Areas.Admin.Controllers;
 
 /// <summary>Arayüz metinleri (IStringLocalizer kaynağı) — dil sekmeli, tek formda tüm diller.</summary>
-public class LocalizationController : AdminControllerBase
+public class LocalizationController : AdminOnlyControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly ILocalizationStore _store;

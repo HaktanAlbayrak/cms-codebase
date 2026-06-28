@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Yetkisiz Erişim";
+}
+
+<div class="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center">
+    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+        <i data-lucide="shield-alert" class="h-7 w-7"></i>
+    </div>
+    <h2 class="mb-2 text-lg font-bold text-ink">Bu sayfaya erişim yetkiniz yok</h2>
+    <p class="mb-6 text-sm text-slate-500">
+        Bu bölüm yalnızca <strong>Admin</strong> rolündeki kullanıcılara açıktır. İçerik Yöneticisi
+        olarak Sayfalar, Slider, Medya ve Mesajlar bölümlerini yönetebilirsiniz.
+    </p>
+    <a href="/Admin/Dashboard" class="btn-brand inline-flex"><i data-lucide="arrow-left" class="h-4 w-4"></i>Panele Dön</a>
+</div>

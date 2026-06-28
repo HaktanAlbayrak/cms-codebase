@@ -4,7 +4,7 @@ using Starter.Cms.Services;
 namespace Starter.Cms.Areas.Admin.Controllers;
 
 /// <summary>Marka, tema rengi, iletişim, sosyal, SEO ve logo ayarları (sıfır statik).</summary>
-public class BrandingController : AdminControllerBase
+public class BrandingController : AdminOnlyControllerBase
 {
     private readonly IBrandingService _branding;
     private readonly ISiteSettingService _settings;
