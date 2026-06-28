@@ -21,6 +21,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Slide> Slides => Set<Slide>();
     public DbSet<SlideTranslation> SlideTranslations => Set<SlideTranslation>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+    public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
+    public DbSet<MediaAssetTranslation> MediaAssetTranslations => Set<MediaAssetTranslation>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -31,11 +33,13 @@ public class ApplicationDbContext : DbContext
         b.Entity<SiteSetting>().HasIndex(x => x.Key).IsUnique();
         b.Entity<Page>().HasIndex(x => x.Slug).IsUnique();
         b.Entity<LocalizationResource>().HasIndex(x => new { x.Key, x.LanguageCode }).IsUnique();
+        b.Entity<MediaAsset>().HasIndex(x => x.Url).IsUnique();
 
         // Aynı dilde iki çeviri olmasın.
         b.Entity<PageTranslation>().HasIndex(x => new { x.PageId, x.LanguageCode }).IsUnique();
         b.Entity<SlideTranslation>().HasIndex(x => new { x.SlideId, x.LanguageCode }).IsUnique();
         b.Entity<MenuItemTranslation>().HasIndex(x => new { x.MenuItemId, x.LanguageCode }).IsUnique();
+        b.Entity<MediaAssetTranslation>().HasIndex(x => new { x.MediaAssetId, x.LanguageCode }).IsUnique();
 
         // ── İlişkiler — çeviri tabloları ana kayıtla birlikte cascade silinir ──
         b.Entity<Page>().HasMany(x => x.Translations).WithOne(x => x.Page!)
@@ -46,6 +50,9 @@ public class ApplicationDbContext : DbContext
 
         b.Entity<MenuItem>().HasMany(x => x.Translations).WithOne(x => x.MenuItem!)
             .HasForeignKey(x => x.MenuItemId).OnDelete(DeleteBehavior.Cascade);
+
+        b.Entity<MediaAsset>().HasMany(x => x.Translations).WithOne(x => x.MediaAsset!)
+            .HasForeignKey(x => x.MediaAssetId).OnDelete(DeleteBehavior.Cascade);
     }
 
     /// <summary>Kaydetmeden önce denetim alanlarını otomatik güncelle.</summary>

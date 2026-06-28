@@ -10,8 +10,17 @@ public class DashboardVm
     public int UnreadMessageCount { get; init; }
 }
 
-/// <summary>Medya kütüphanesindeki tek bir dosya.</summary>
-public record MediaItem(string Url, string Name, string Folder, long Size, DateTime Modified);
+/// <summary>Medya metadata düzenleme formu. Çeviri alanları dil-koduyla sözlüklenir.</summary>
+public class MediaEditModel
+{
+    public int Id { get; set; }
+    public int SortOrder { get; set; }
+    public bool IsActive { get; set; } = true;
+
+    public Dictionary<string, string> Title { get; set; } = new();
+    public Dictionary<string, string> Alt { get; set; } = new();
+    public Dictionary<string, string> Caption { get; set; } = new();
+}
 
 /// <summary>Sayfa düzenleme formu. Çeviri alanları dil-koduyla sözlüklenir (Title["tr"]).</summary>
 public class PageEditModel

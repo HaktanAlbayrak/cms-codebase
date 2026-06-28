@@ -13,6 +13,12 @@ public interface IFileStorageService
     /// <summary>Belge (PDF) kaydeder ve web yolunu döner.</summary>
     Task<string> SaveDocumentAsync(IFormFile file, string subfolder);
 
+    /// <summary>Desteklenen herhangi bir medyayı (görsel/video/PDF/belge/ses) kaydeder ve web yolunu döner.</summary>
+    Task<string> SaveMediaAsync(IFormFile file, string subfolder);
+
+    /// <summary>Bir uzantı medya kütüphanesinde destekleniyor mu?</summary>
+    bool IsAllowed(string fileName);
+
     /// <summary>Yerel bir yükleme dosyasını siler (best-effort; harici URL'lere dokunmaz).</summary>
     void Delete(string? webPath);
 }
@@ -29,6 +35,19 @@ public class FileStorageService : IFileStorageService
         ".pdf"
     };
 
+    // Tüm medya kütüphanesi: görsel + video + belge + ses. Yeni tür eklemek için buraya ekle.
+    private static readonly HashSet<string> AllowedMediaExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        // Görsel
+        ".jpg", ".jpeg", ".png", ".webp", ".svg", ".ico", ".avif", ".gif",
+        // Video
+        ".mp4", ".webm", ".mov", ".ogv",
+        // Belge
+        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".zip",
+        // Ses
+        ".mp3", ".wav", ".ogg", ".m4a"
+    };
+
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<FileStorageService> _logger;
 
@@ -43,6 +62,15 @@ public class FileStorageService : IFileStorageService
 
     public Task<string> SaveDocumentAsync(IFormFile file, string subfolder) =>
         SaveCoreAsync(file, subfolder, AllowedDocumentExtensions);
+
+    public Task<string> SaveMediaAsync(IFormFile file, string subfolder) =>
+        SaveCoreAsync(file, subfolder, AllowedMediaExtensions);
+
+    public bool IsAllowed(string fileName)
+    {
+        var ext = Path.GetExtension(fileName);
+        return !string.IsNullOrWhiteSpace(ext) && AllowedMediaExtensions.Contains(ext);
+    }
 
     private async Task<string> SaveCoreAsync(IFormFile file, string subfolder, HashSet<string> allowed)
     {

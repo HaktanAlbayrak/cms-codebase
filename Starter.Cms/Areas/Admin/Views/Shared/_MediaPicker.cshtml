@@ -1,7 +1,8 @@
 @*
-    Tek medya kütüphanesi seçici. Her görsel/PDF alanında "Medyadan Seç" ile açılır:
-        window.openMediaPicker(function (url) { ... });
-    Yeni yükleme de aynı kütüphaneye (/uploads) düşer ve listede görünür.
+    Tek medya kütüphanesi seçici (DB destekli). Her görsel/video/PDF/belge alanında açılır:
+        window.openMediaPicker(function (url) { ... });                // tüm türler
+        window.openMediaPicker(function (url) { ... }, "image");       // yalnız görsel
+    Tür filtresi: image | video | pdf | document | audio. Yeni yükleme aynı kütüphaneye düşer.
 *@
 <div id="mediaPicker" class="fixed inset-0 z-[100] hidden">
     <div class="absolute inset-0 bg-black/50" onclick="closeMediaPicker()"></div>
@@ -10,8 +11,9 @@
             <h3 class="text-sm font-bold text-ink">Medya Kütüphanesi</h3>
             <button type="button" onclick="closeMediaPicker()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="h-5 w-5"></i></button>
         </div>
+        <div id="mpTabs" class="flex flex-wrap gap-1 border-b border-slate-100 px-5 py-2"></div>
         <div class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-5 py-3">
-            <input type="file" id="mpUploadInput" class="text-xs" accept="image/*,video/*,application/pdf" />
+            <input type="file" id="mpUploadInput" class="text-xs" />
             <button type="button" onclick="mpUpload()" class="btn-brand !px-3 !py-1.5 !text-xs">Yükle</button>
             <span id="mpUploadMsg" class="text-xs text-slate-500"></span>
         </div>
@@ -25,14 +27,26 @@
 <script>
     (function () {
         var cb = null;
+        var restrictType = null; // alan yalnız belirli bir türe izin veriyorsa
+        var activeType = null;   // kullanıcı sekme filtresi
+        var TYPES = [
+            { v: null, label: 'Tümü' }, { v: 'image', label: 'Görsel' }, { v: 'video', label: 'Video' },
+            { v: 'pdf', label: 'PDF' }, { v: 'document', label: 'Belge' }, { v: 'audio', label: 'Ses' }
+        ];
+
         function token() {
             var el = document.querySelector('input[name="__RequestVerificationToken"]');
             return el ? el.value : '';
         }
-        function isImage(url) { return /\.(jpe?g|png|webp|svg|ico|avif|gif)$/i.test(url); }
+        function icon(type) {
+            return ({ image: 'image', video: 'video', pdf: 'file-text', audio: 'music', document: 'file' })[type] || 'file';
+        }
 
-        window.openMediaPicker = function (callback) {
+        window.openMediaPicker = function (callback, typeFilter) {
             cb = callback;
+            restrictType = typeFilter || null;
+            activeType = restrictType;
+            renderTabs();
             document.getElementById('mediaPicker').classList.remove('hidden');
             loadGrid();
         };
@@ -41,23 +55,41 @@
             cb = null;
         };
 
+        function renderTabs() {
+            var box = document.getElementById('mpTabs');
+            if (restrictType) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden');
+            box.innerHTML = '';
+            TYPES.forEach(function (t) {
+                var b = document.createElement('button');
+                b.type = 'button';
+                var on = activeType === t.v;
+                b.className = 'rounded px-2.5 py-1 text-xs ' + (on ? 'bg-brand text-white' : 'text-slate-500 hover:bg-slate-100');
+                b.textContent = t.label;
+                b.onclick = function () { activeType = t.v; renderTabs(); loadGrid(); };
+                box.appendChild(b);
+            });
+        }
+
         function loadGrid() {
             var grid = document.getElementById('mpGrid');
             grid.innerHTML = '<p class="col-span-full text-sm text-slate-400">Yükleniyor…</p>';
-            fetch('/Admin/Media/List').then(function (r) { return r.json(); }).then(function (items) {
-                if (!items.length) { grid.innerHTML = '<p class="col-span-full text-sm text-slate-400">Henüz dosya yok. Yukarıdan yükleyin.</p>'; return; }
+            var url = '/Admin/Media/List' + (activeType ? ('?type=' + activeType) : '');
+            fetch(url).then(function (r) { return r.json(); }).then(function (items) {
+                if (!items.length) { grid.innerHTML = '<p class="col-span-full text-sm text-slate-400">Bu türde dosya yok. Yukarıdan yükleyin.</p>'; return; }
                 grid.innerHTML = '';
                 items.forEach(function (m) {
                     var b = document.createElement('button');
                     b.type = 'button';
                     b.className = 'group overflow-hidden rounded-lg border border-slate-200 bg-white hover:border-brand';
-                    var inner = isImage(m.url)
+                    var inner = m.type === 'image'
                         ? '<div class="flex h-24 items-center justify-center bg-slate-50 p-1"><img src="' + m.url + '" class="max-h-full max-w-full object-contain"></div>'
-                        : '<div class="flex h-24 items-center justify-center bg-slate-50 text-slate-400"><span class="text-xs font-semibold uppercase">' + m.name.split('.').pop() + '</span></div>';
+                        : '<div class="flex h-24 flex-col items-center justify-center gap-1 bg-slate-50 text-slate-400"><i data-lucide="' + icon(m.type) + '" class="h-7 w-7"></i><span class="text-[10px] font-semibold uppercase">' + m.name.split('.').pop() + '</span></div>';
                     b.innerHTML = inner + '<p class="truncate px-1 py-1 text-[10px] text-slate-500">' + m.name + '</p>';
-                    b.onclick = function () { if (cb) cb(m.url); closeMediaPicker(); };
+                    b.onclick = function () { if (cb) cb(m.url, m); closeMediaPicker(); };
                     grid.appendChild(b);
                 });
+                if (window.lucide) window.lucide.createIcons();
             });
         }
 

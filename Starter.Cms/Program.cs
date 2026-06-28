@@ -36,6 +36,7 @@ builder.Services.AddScoped<ISlideService, SlideService>();
 builder.Services.AddScoped<IPageService, PageService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddSingleton<IAdminAuthService, AdminAuthService>();
 
 // ── SMTP / e-posta (ayarlar DB'den · SiteSettings smtp.* okunur) ──
@@ -86,6 +87,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
     await DbSeeder.SeedAsync(db);
+
+    // wwwroot/uploads altındaki mevcut dosyaları medya kütüphanesine içeri aktar (idempotent).
+    await scope.ServiceProvider.GetRequiredService<IMediaService>().ImportExistingFilesAsync();
 
     var languages = db.Languages.Where(l => l.IsActive).OrderBy(l => l.SortOrder)
         .Select(l => new { l.Code, l.IsRtl, l.IsDefault }).ToList();

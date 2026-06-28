@@ -22,6 +22,7 @@ public static class AdminMessages
 
     public const string MediaUploaded = "Dosya yüklendi.";
     public const string MediaDeleted = "Dosya silindi.";
+    public const string MediaSaved = "Medya bilgileri kaydedildi.";
 
     public const string ContactMessageDeleted = "Mesaj silindi.";
 
