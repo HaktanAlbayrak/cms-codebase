@@ -36,10 +36,15 @@ public class SeoController : Controller
         var host = $"{Request.Scheme}://{Request.Host}";
         var cultures = CultureContext.Supported;
 
-        // Statik üst sayfalar + DB'deki aktif içerik sayfaları (slug bazlı).
+        // Statik üst sayfalar + DB'deki aktif içerik (sayfa/makine/hizmet slug bazlı).
         var pageSlugs = await _db.Pages.Where(p => p.IsActive).Select(p => p.Slug).ToListAsync();
-        var paths = new List<string> { "" };               // ana sayfa
-        paths.AddRange(pageSlugs.Select(s => "/" + s));     // /about, /contact ...
+        var machineSlugs = await _db.Machines.Where(m => m.IsActive).Select(m => m.Slug).ToListAsync();
+        var serviceSlugs = await _db.Services.Where(s => s.IsActive).Select(s => s.Slug).ToListAsync();
+
+        var paths = new List<string> { "", "/makineler", "/hizmetler" };  // ana sayfa + liste sayfaları
+        paths.AddRange(pageSlugs.Select(s => "/" + s));                    // /about, /contact ...
+        paths.AddRange(machineSlugs.Select(s => $"/makine/{s}"));          // makine detayları
+        paths.AddRange(serviceSlugs.Select(s => $"/hizmet/{s}"));          // hizmet detayları
 
         var sb = new StringBuilder();
         var settings = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
