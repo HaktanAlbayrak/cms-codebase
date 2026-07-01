@@ -78,6 +78,19 @@
         }
     </style>
 
+    @* Reveal guard — boyamadan ÖNCE çalışır (FOUC yok). Yalnızca hareket izni
+       varsa ve kullanıcı veri tasarrufu istemiyorsa reveal başlangıç durumlarını
+       aktifleştirir. JS kapalıysa/koşul sağlanmazsa içerik anında görünür kalır. *@
+    <script>
+        (function () {
+            try {
+                var m = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                var save = navigator.connection && navigator.connection.saveData;
+                if (!m && !save) document.documentElement.classList.add('js-reveal');
+            } catch (e) {}
+        })();
+    </script>
+
     @* JSON-LD yapısal veri (Organization + WebSite) *@
     <script type="application/ld+json">
     {
@@ -146,6 +159,7 @@
             window.lightGallery && lightGallery(el, { plugins: [window.lgThumbnail, window.lgZoom].filter(Boolean), speed: 400, download: false });
         });
     </script>
+    <script src="~/js/motion.js" asp-append-version="true" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

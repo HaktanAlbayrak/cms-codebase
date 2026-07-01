@@ -22,9 +22,9 @@ else
 <article class="mx-auto max-w-5xl px-4 py-14 sm:px-6">
     @if (!string.IsNullOrWhiteSpace(Model.Lead))
     {
-        <p class="mb-8 text-xl text-slate-500">@Model.Lead</p>
+        <p class="mb-8 text-xl text-slate-500" data-reveal>@Model.Lead</p>
     }
-    <div class="prose prose-slate max-w-none lg:prose-lg">
+    <div class="prose prose-slate max-w-none lg:prose-lg" data-reveal>
         @Html.Raw(Model.Body)
     </div>
 </article>

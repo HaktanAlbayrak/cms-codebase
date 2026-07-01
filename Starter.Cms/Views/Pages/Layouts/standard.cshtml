@@ -18,9 +18,9 @@
 <article class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
     @if (!string.IsNullOrWhiteSpace(Model.CoverImageUrl))
     {
-        <img src="@Model.CoverImageUrl" alt="@Model.Title" class="mb-8 w-full rounded-2xl object-cover" />
+        <img src="@Model.CoverImageUrl" alt="@Model.Title" class="mb-8 w-full rounded-2xl object-cover" data-reveal="scale" />
     }
-    <div class="prose prose-slate max-w-none">
+    <div class="prose prose-slate max-w-none" data-reveal>
         @Html.Raw(Model.Body)
     </div>
 </article>
