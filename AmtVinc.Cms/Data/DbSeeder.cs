@@ -11,11 +11,15 @@ namespace AmtVinc.Cms.Data;
 /// </summary>
 public static class DbSeeder
 {
-    // Başlangıç görselleri (Unsplash — vinç/şantiye). Admin panelden kendi görsellerinizle değiştirin.
+    // Başlangıç görselleri (Unsplash — ücretsiz vinç/şantiye görselleri, siteyi süslemek için).
+    // Admin panelden medya kütüphanesindeki kendi görsellerinizle değiştirin.
     private const string Hero1 = "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=1600&auto=format&fit=crop";
     private const string Hero2 = "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1600&auto=format&fit=crop";
     private const string Mac1 = "https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=1200&auto=format&fit=crop";
     private const string Mac2 = "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=1200&auto=format&fit=crop";
+    private const string Mac3 = "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop";
+    private const string Mac4 = "https://images.unsplash.com/photo-1590496793929-36417d3117de?q=80&w=1200&auto=format&fit=crop";
+    private const string AboutCover = "https://images.unsplash.com/photo-1516216628859-9bccecab13ca?q=80&w=1600&auto=format&fit=crop";
 
     public static async Task SeedAsync(ApplicationDbContext db, IConfiguration? config = null)
     {
@@ -105,9 +109,9 @@ public static class DbSeeder
 
         // Marka (logo boşsa firma adı metni gösterilir)
         Add("branding.companyName", "AMT Vinç Platform", "branding");
-        Add("branding.logoUrl", "", "branding");
-        Add("branding.logoLightUrl", "", "branding");
-        Add("branding.faviconUrl", "/favicon.ico", "branding");
+        Add("branding.logoUrl", "/img/logo.svg", "branding");
+        Add("branding.logoLightUrl", "/img/logo-light.svg", "branding");
+        Add("branding.faviconUrl", "/favicon.svg", "branding");
         Add("branding.address", "Örnek Mah. Sanayi Cad. No:1, İstanbul", "branding");
         Add("branding.workingHours", "7/24 Hizmet · Pzt - Cmt: 08:00 - 19:00", "branding");
 
@@ -322,17 +326,17 @@ public static class DbSeeder
             "20 m Eklemli Platform", "Orta yükseklikte geniş çalışma yarıçapı.",
             "20 m Articulated Boom", "Wide working radius at medium height.");
 
-        Add(teleskopik, 1, true, Mac1, "22m-teleskopik-platform", "22 m", "230 kg", "18 m", "10.900 kg",
+        Add(teleskopik, 1, true, Mac3, "22m-teleskopik-platform", "22 m", "230 kg", "18 m", "10.900 kg",
             "22 m Teleskopik Platform", "Uzun yatay erişimli teleskopik bom platformu.",
             "22 m Telescopic Boom", "Telescopic boom with long horizontal reach.");
-        Add(teleskopik, 2, false, Mac2, "28m-teleskopik-platform", "28 m", "230 kg", "23 m", "14.500 kg",
+        Add(teleskopik, 2, false, Mac3, "28m-teleskopik-platform", "28 m", "230 kg", "23 m", "14.500 kg",
             "28 m Teleskopik Platform", "Yüksek ve uzak noktalar için teleskopik platform.",
             "28 m Telescopic Boom", "Telescopic boom for high and distant points.");
 
-        Add(sepetli, 1, true, Mac2, "30m-sepetli-vinc", "30 m", "200 kg", "20 m", "",
+        Add(sepetli, 1, true, Mac4, "30m-sepetli-vinc", "30 m", "200 kg", "20 m", "",
             "30 m Sepetli Vinç", "Araç üstü, hızlı konumlanan yüksek erişimli sepetli vinç.",
             "30 m Truck Platform", "Truck-mounted, quickly positioned high-reach platform.");
-        Add(sepetli, 2, false, Mac1, "45m-sepetli-vinc", "45 m", "300 kg", "30 m", "",
+        Add(sepetli, 2, false, Mac4, "45m-sepetli-vinc", "45 m", "300 kg", "30 m", "",
             "45 m Sepetli Vinç", "Çok katlı cephe ve endüstriyel işler için yüksek sepetli vinç.",
             "45 m Truck Platform", "High truck platform for multi-storey façades and industry.");
 
@@ -347,6 +351,7 @@ public static class DbSeeder
         {
             Slug = "about",
             LayoutKey = "standard",
+            CoverImageUrl = AboutCover,
             SortOrder = 1,
             Translations =
             {

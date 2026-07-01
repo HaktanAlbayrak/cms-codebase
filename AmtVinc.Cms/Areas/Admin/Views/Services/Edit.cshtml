@@ -103,7 +103,7 @@
 </form>
 
 @section Scripts {
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    @* Zengin metin editörü (CKEditor 5) _AdminLayout'ta merkezî olarak yüklenir. *@
     <script>
         function showLang(code, btn) {
             document.querySelectorAll('[data-lang-pane]').forEach(function (p) { p.classList.toggle('hidden', p.getAttribute('data-lang-pane') !== code); });
@@ -118,11 +118,5 @@
             ic.setAttribute('data-lucide', this.value || 'construction');
             if (window.lucide) lucide.createIcons();
         });
-
-        if (window.CKEDITOR) {
-            document.querySelectorAll('textarea.ck').forEach(function (ta) {
-                CKEDITOR.replace(ta, { filebrowserUploadUrl: '/Admin/Media/CkUpload', filebrowserUploadMethod: 'form' });
-            });
-        }
     </script>
 }

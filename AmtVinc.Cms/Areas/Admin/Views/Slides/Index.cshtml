@@ -14,7 +14,7 @@
     @foreach (var s in Model)
     {
         var t = s.Translations.FirstOrDefault(x => x.LanguageCode == defaultCode) ?? s.Translations.FirstOrDefault();
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
             <div class="relative h-36 bg-slate-100">
                 @if (!string.IsNullOrWhiteSpace(s.ImageDesktop))
                 {

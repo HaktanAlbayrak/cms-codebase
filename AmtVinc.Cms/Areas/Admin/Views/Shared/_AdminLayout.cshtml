@@ -36,14 +36,24 @@
     <title>@(ViewData["Title"] ?? "Yönetim") — @brand.CompanyName</title>
     <link rel="icon" href="@brand.FaviconUrl" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.css" />
     <style>:root{--brand:@brandChannels;--brand-dark:@brandDarkChannels;--ink:15 23 42;}</style>
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800 antialiased">
+    @* Mobil sidebar arka planı (karartma) *@
+    <div id="adminOverlay" class="fixed inset-0 z-40 hidden bg-ink/50 backdrop-blur-sm lg:hidden" onclick="toggleAdminSidebar(false)"></div>
+
     <div class="flex min-h-screen">
-        <aside class="sticky top-0 flex h-screen w-64 shrink-0 flex-col self-start overflow-y-auto bg-ink text-slate-300">
-            <div class="border-b border-white/10 px-5 py-5">
-                <a href="/Admin/Dashboard" class="font-display text-lg font-extrabold text-white">@brand.CompanyName</a>
-                <p class="mt-0.5 text-xs text-slate-500">Yönetim Paneli</p>
+        <aside id="adminSidebar"
+               class="fixed inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 -translate-x-full flex-col overflow-y-auto bg-ink text-slate-300 transition-transform duration-200 lg:sticky lg:top-0 lg:translate-x-0 lg:self-start">
+            <div class="flex items-center justify-between border-b border-white/10 px-5 py-5">
+                <a href="/Admin/Dashboard" class="min-w-0">
+                    <span class="block truncate font-display text-lg font-extrabold text-white">@brand.CompanyName</span>
+                    <span class="mt-0.5 block text-xs text-slate-500">Yönetim Paneli</span>
+                </a>
+                <button type="button" onclick="toggleAdminSidebar(false)" class="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-white lg:hidden" aria-label="Menüyü kapat">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
             </div>
             <nav class="flex-1 space-y-1 p-3">
                 @foreach (var (ctrl, icon, label, adminOnly) in nav)
@@ -81,12 +91,15 @@
             </div>
         </aside>
 
-        <div class="flex-1 overflow-x-hidden">
-            <header class="sticky top-0 z-30 border-b border-slate-200 bg-white px-6 py-4">
-                <h1 class="text-lg font-bold text-ink">@(ViewData["Title"] ?? "Yönetim")</h1>
+        <div class="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+            <header class="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
+                <button type="button" onclick="toggleAdminSidebar(true)" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden" aria-label="Menüyü aç">
+                    <i data-lucide="menu" class="h-6 w-6"></i>
+                </button>
+                <h1 class="truncate text-lg font-bold text-ink">@(ViewData["Title"] ?? "Yönetim")</h1>
             </header>
 
-            <main class="p-6">
+            <main class="p-4 sm:p-6">
                 @if (TempData["Success"] is string ok)
                 {
                     <div class="mb-5 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
@@ -108,7 +121,53 @@
     @await Html.PartialAsync("_MediaPicker")
 
     <script src="https://unpkg.com/lucide@@latest"></script>
-    <script>if (window.lucide) lucide.createIcons();</script>
+    <script>
+        if (window.lucide) lucide.createIcons();
+        // Mobil sidebar aç/kapat.
+        function toggleAdminSidebar(open) {
+            var sb = document.getElementById('adminSidebar');
+            var ov = document.getElementById('adminOverlay');
+            if (!sb) return;
+            var show = open === undefined ? sb.classList.contains('-translate-x-full') : open;
+            sb.classList.toggle('-translate-x-full', !show);
+            ov.classList.toggle('hidden', !show);
+        }
+    </script>
+
+    @* CKEditor 5 — tüm textarea.ck alanları merkezi olarak zengin editöre çevrilir.
+       Görsel yüklemeleri /Admin/Media/CkUpload üzerinden medya kütüphanesine düşer. *@
+    <script type="importmap">
+    {
+        "imports": {
+            "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/44.1.0/ckeditor5.js",
+            "ckeditor5/": "https://cdn.ckeditor.com/ckeditor5/44.1.0/"
+        }
+    }
+    </script>
+    <script type="module">
+        import { ClassicEditor, Essentials, Paragraph, Bold, Italic, Underline, Link, List, Heading,
+                 BlockQuote, Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageUpload,
+                 SimpleUploadAdapter, Table, TableToolbar, MediaEmbed, PasteFromOffice, Alignment,
+                 Indent, HorizontalLine, Autoformat } from 'ckeditor5';
+
+        document.querySelectorAll('textarea.ck').forEach(function (ta) {
+            ClassicEditor.create(ta, {
+                licenseKey: 'GPL',
+                plugins: [Essentials, Paragraph, Bold, Italic, Underline, Link, List, Heading, BlockQuote,
+                          Image, ImageToolbar, ImageCaption, ImageStyle, ImageResize, ImageUpload,
+                          SimpleUploadAdapter, Table, TableToolbar, MediaEmbed, PasteFromOffice, Alignment,
+                          Indent, HorizontalLine, Autoformat],
+                toolbar: ['heading', '|', 'bold', 'italic', 'underline', 'link', 'bulletedList', 'numberedList',
+                          '|', 'alignment', 'outdent', 'indent', '|', 'blockQuote', 'insertTable', 'uploadImage',
+                          'mediaEmbed', 'horizontalLine', '|', 'undo', 'redo'],
+                image: { toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative'] },
+                table: { contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'] },
+                simpleUpload: { uploadUrl: '/Admin/Media/CkUpload' }
+            }).then(function (editor) {
+                editor.model.document.on('change:data', function () { editor.updateSourceElement(); });
+            }).catch(function (err) { console.error('CKEditor:', err); });
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
