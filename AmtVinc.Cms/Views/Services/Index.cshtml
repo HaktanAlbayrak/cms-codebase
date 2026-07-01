@@ -1,0 +1,51 @@
+@model IReadOnlyList<ServiceVm>
+@{
+    ViewData["Title"] = Localizer["services.title"].Value;
+    ViewData["MetaDescription"] = Localizer["services.subtitle"].Value;
+}
+
+<section class="border-b border-slate-100 bg-slate-50">
+    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+        <nav class="mb-4 text-sm text-slate-400">
+            <a href="@CultureContext.LocalizedPath("/")" class="hover:text-brand">@Localizer["common.home"]</a>
+            <span class="mx-1">/</span>
+            <span class="text-slate-600">@Localizer["services.title"]</span>
+        </nav>
+        <h1 class="font-display text-3xl font-extrabold text-ink sm:text-4xl">@Localizer["services.title"]</h1>
+        <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-500">@Localizer["services.subtitle"]</p>
+    </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    @if (Model.Count == 0)
+    {
+        <p class="text-center text-slate-400">@Localizer["common.emptyContent"]</p>
+    }
+    else
+    {
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            @foreach (var s in Model)
+            {
+                <a href="@CultureContext.LocalizedPath($"/hizmet/{s.Slug}")"
+                   class="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                    @if (!string.IsNullOrWhiteSpace(s.ImageUrl))
+                    {
+                        <div class="aspect-[16/10] overflow-hidden bg-slate-100">
+                            <img src="@s.ImageUrl" alt="@s.Title" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                        </div>
+                    }
+                    <div class="flex flex-1 flex-col p-7">
+                        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                            <i data-lucide="@s.Icon" class="h-6 w-6"></i>
+                        </div>
+                        <h2 class="mb-2 text-lg font-bold text-ink">@s.Title</h2>
+                        <p class="flex-1 text-sm leading-relaxed text-slate-500">@s.Summary</p>
+                        <span class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-brand">
+                            @Localizer["common.readMore"]
+                        </span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>

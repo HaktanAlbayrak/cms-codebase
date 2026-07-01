@@ -1,0 +1,91 @@
+@model List<AmtVinc.Cms.Domain.Machine>
+@{
+    ViewData["Title"] = "Makine Filosu";
+    var defaultCode = CultureContext.Default;
+    string Name(AmtVinc.Cms.Domain.Machine m)
+    {
+        var t = m.Translations.FirstOrDefault(x => x.LanguageCode == defaultCode) ?? m.Translations.FirstOrDefault();
+        return t?.Name ?? m.Slug;
+    }
+    string Cat(AmtVinc.Cms.Domain.Machine m)
+    {
+        var t = m.Category?.Translations.FirstOrDefault(x => x.LanguageCode == defaultCode) ?? m.Category?.Translations.FirstOrDefault();
+        return t?.Name ?? m.Category?.Slug ?? "—";
+    }
+}
+
+<partial name="_PageHelp" model="@("Filodaki makineler. Her makine bir kategoriye bağlıdır; teknik özellikler (çalışma yüksekliği, kapasite) dilden bağımsızdır. 'Öne Çıkar' işaretli makineler ana sayfada gösterilir.")" />
+
+<div class="mb-5 flex justify-end gap-2">
+    <a href="/Admin/MachineCategories" class="btn-outline"><i data-lucide="folder-tree" class="h-4 w-4"></i>Kategoriler</a>
+    <a href="/Admin/Machines/Edit" class="btn-brand"><i data-lucide="plus" class="h-4 w-4"></i>Yeni Makine</a>
+</div>
+
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+    <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+            <tr>
+                <th class="px-5 py-3">Görsel</th>
+                <th class="px-5 py-3">Makine</th>
+                <th class="px-5 py-3">Kategori</th>
+                <th class="px-5 py-3">Özellikler</th>
+                <th class="px-5 py-3">Durum</th>
+                <th class="px-5 py-3 text-right">İşlem</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            @foreach (var m in Model)
+            {
+                <tr>
+                    <td class="px-5 py-3">
+                        @if (!string.IsNullOrWhiteSpace(m.ImageUrl))
+                        {
+                            <img src="@m.ImageUrl" class="h-12 w-16 rounded-lg border border-slate-200 object-cover" />
+                        }
+                        else
+                        {
+                            <span class="flex h-12 w-16 items-center justify-center rounded-lg bg-slate-100 text-slate-300"><i data-lucide="image-off" class="h-4 w-4"></i></span>
+                        }
+                    </td>
+                    <td class="px-5 py-3">
+                        <div class="font-medium text-ink">@Name(m)</div>
+                        @if (m.IsFeatured)
+                        {
+                            <span class="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"><i data-lucide="star" class="h-3 w-3"></i>Öne çıkan</span>
+                        }
+                    </td>
+                    <td class="px-5 py-3 text-slate-500">@Cat(m)</td>
+                    <td class="px-5 py-3 text-xs text-slate-500" dir="ltr">
+                        @{
+                            var parts = new[] { m.WorkingHeight, m.Capacity }.Where(x => !string.IsNullOrWhiteSpace(x));
+                        }
+                        @string.Join(" · ", parts)
+                    </td>
+                    <td class="px-5 py-3">
+                        @if (m.IsActive)
+                        {
+                            <span class="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">Yayında</span>
+                        }
+                        else
+                        {
+                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">Taslak</span>
+                        }
+                    </td>
+                    <td class="px-5 py-3">
+                        <div class="flex justify-end gap-2">
+                            <a href="/Admin/Machines/Edit/@m.Id" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-brand"><i data-lucide="pencil" class="h-4 w-4"></i></a>
+                            <form method="post" action="/Admin/Machines/Delete/@m.Id" onsubmit="return confirm('Bu makine silinsin mi?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">Henüz makine yok.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

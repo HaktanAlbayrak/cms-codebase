@@ -1,0 +1,143 @@
+@model MachineEditModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Yeni Makine" : "Makine Düzenle";
+    var languages = ViewBag.Languages as List<Language> ?? new();
+    var categories = ViewBag.Categories as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new();
+}
+
+<partial name="_PageHelp" model="@("Makineyi bir kategoriye bağlayın, görselini ekleyin ve teknik özellikleri sayı+birim olarak girin (ör. 16 m, 230 kg). Ad ve açıklamalar her dil için ayrı sekmede yönetilir.")" />
+
+<form method="post" action="/Admin/Machines/Edit" enctype="multipart/form-data" class="space-y-6">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ImageUrl" id="ImageUrl" value="@Model.ImageUrl" />
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="space-y-5 lg:col-span-2">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <div class="mb-4 flex gap-2 border-b border-slate-200">
+                    @for (var i = 0; i < languages.Count; i++)
+                    {
+                        var lang = languages[i];
+                        <button type="button" class="lang-tab -mb-px border-b-2 px-4 py-2 text-sm font-semibold @(i == 0 ? "border-brand text-brand" : "border-transparent text-slate-400")" data-lang="@lang.Code" onclick="showLang('@lang.Code', this)">
+                            @lang.Name @(lang.IsDefault ? "★" : "")
+                        </button>
+                    }
+                </div>
+
+                @for (var i = 0; i < languages.Count; i++)
+                {
+                    var lang = languages[i];
+                    var code = lang.Code;
+                    <div class="lang-pane space-y-4 @(i == 0 ? "" : "hidden")" data-lang-pane="@code">
+                        <div>
+                            <label class="form-label">Makine Adı (@code)</label>
+                            <input class="form-input" name="Name[@code]" value="@(Model.Name.TryGetValue(code, out var nm) ? nm : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">Kısa Açıklama (@code)</label>
+                            <input class="form-input" name="ShortDescription[@code]" value="@(Model.ShortDescription.TryGetValue(code, out var sd) ? sd : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">Detay Açıklama (@code)</label>
+                            <textarea class="form-input ck" name="Description[@code]" rows="8">@(Model.Description.TryGetValue(code, out var de) ? de : "")</textarea>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-4 text-sm font-bold text-ink">Teknik Özellikler <span class="font-normal text-slate-400">(sayı + birim, ör. "16 m")</span></h3>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="form-label">Çalışma Yüksekliği</label>
+                        <input class="form-input" name="WorkingHeight" value="@Model.WorkingHeight" placeholder="16 m" dir="ltr" />
+                    </div>
+                    <div>
+                        <label class="form-label">Kapasite</label>
+                        <input class="form-input" name="Capacity" value="@Model.Capacity" placeholder="230 kg" dir="ltr" />
+                    </div>
+                    <div>
+                        <label class="form-label">Yatay Erişim</label>
+                        <input class="form-input" name="Reach" value="@Model.Reach" placeholder="9 m" dir="ltr" />
+                    </div>
+                    <div>
+                        <label class="form-label">Ağırlık</label>
+                        <input class="form-input" name="Weight" value="@Model.Weight" placeholder="2.900 kg" dir="ltr" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-4 text-sm font-bold text-ink">Yayın</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="form-label">Kategori</label>
+                        <select class="form-input" name="MachineCategoryId">
+                            @foreach (var c in categories)
+                            {
+                                <option value="@c.Value" selected="@(Model.MachineCategoryId.ToString() == c.Value)">@c.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Slug (URL adı)</label>
+                        <input class="form-input" name="Slug" value="@Model.Slug" placeholder="16m-makasli-platform" required />
+                        <p class="mt-1 text-xs text-slate-400">Adres: /tr/makine/<span id="slugPreview">@Model.Slug</span></p>
+                    </div>
+                    <div>
+                        <label class="form-label">Sıra</label>
+                        <input class="form-input" name="SortOrder" type="number" value="@Model.SortOrder" />
+                    </div>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="IsFeatured" value="true" @(Model.IsFeatured ? "checked" : "") class="h-4 w-4 rounded border-slate-300" />
+                        Ana sayfada öne çıkar
+                    </label>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") class="h-4 w-4 rounded border-slate-300" />
+                        Yayında
+                    </label>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 text-sm font-bold text-ink">Makine Görseli</h3>
+                <div id="imagePreview" class="mb-3 @(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "hidden" : "")">
+                    <img src="@Model.ImageUrl" class="w-full rounded-lg border border-slate-200 object-cover" />
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" class="btn-outline !text-xs" onclick="openMediaPicker(function(url){ document.getElementById('ImageUrl').value=url; var p=document.getElementById('imagePreview'); p.classList.remove('hidden'); p.querySelector('img').src=url; }, 'image')">
+                        <i data-lucide="image" class="h-4 w-4"></i>Medyadan Seç
+                    </button>
+                    <input type="file" name="imageFile" accept="image/*" class="text-xs" />
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn-brand flex-1">Kaydet</button>
+                <a href="/Admin/Machines" class="btn-outline">İptal</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        function showLang(code, btn) {
+            document.querySelectorAll('[data-lang-pane]').forEach(function (p) { p.classList.toggle('hidden', p.getAttribute('data-lang-pane') !== code); });
+            document.querySelectorAll('.lang-tab').forEach(function (t) { t.classList.remove('border-brand', 'text-brand'); t.classList.add('border-transparent', 'text-slate-400'); });
+            btn.classList.add('border-brand', 'text-brand'); btn.classList.remove('border-transparent', 'text-slate-400');
+        }
+        var slugInput = document.querySelector('input[name="Slug"]');
+        if (slugInput) slugInput.addEventListener('input', function () { document.getElementById('slugPreview').textContent = this.value; });
+
+        if (window.CKEDITOR) {
+            document.querySelectorAll('textarea.ck').forEach(function (ta) {
+                CKEDITOR.replace(ta, { filebrowserUploadUrl: '/Admin/Media/CkUpload', filebrowserUploadMethod: 'form' });
+            });
+        }
+    </script>
+}

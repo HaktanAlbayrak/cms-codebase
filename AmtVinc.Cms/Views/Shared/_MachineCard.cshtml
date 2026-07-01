@@ -1,0 +1,46 @@
+@model MachineVm
+@{
+    var specs = new (string Icon, string Label, string Value)[]
+    {
+        ("move-vertical", Localizer["machines.specHeight"].Value, Model.WorkingHeight),
+        ("dumbbell", Localizer["machines.specCapacity"].Value, Model.Capacity),
+        ("move-horizontal", Localizer["machines.specReach"].Value, Model.Reach),
+    }.Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToArray();
+}
+<a href="@CultureContext.LocalizedPath($"/makine/{Model.Slug}")"
+   class="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+    <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
+        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="@Model.Name" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+        }
+        else
+        {
+            <span class="flex h-full w-full items-center justify-center text-slate-300"><i data-lucide="construction" class="h-12 w-12"></i></span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.CategoryName))
+        {
+            <span class="absolute left-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold text-white backdrop-blur">@Model.CategoryName</span>
+        }
+    </div>
+    <div class="flex flex-1 flex-col p-6">
+        <h3 class="mb-1.5 text-lg font-bold text-ink">@Model.Name</h3>
+        @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+        {
+            <p class="mb-4 flex-1 text-sm leading-relaxed text-slate-500">@Model.ShortDescription</p>
+        }
+        @if (specs.Length > 0)
+        {
+            <dl class="mt-auto grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
+                @foreach (var s in specs)
+                {
+                    <div>
+                        <dt class="flex items-center justify-center text-brand"><i data-lucide="@s.Icon" class="h-4 w-4"></i></dt>
+                        <dd class="mt-1 text-sm font-bold text-ink" dir="ltr">@s.Value</dd>
+                        <dd class="text-[11px] text-slate-400">@s.Label</dd>
+                    </div>
+                }
+            </dl>
+        }
+    </div>
+</a>

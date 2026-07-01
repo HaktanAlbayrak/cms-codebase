@@ -1,0 +1,37 @@
+@model ServiceVm
+
+<section class="border-b border-slate-100 bg-slate-50">
+    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+        <nav class="mb-4 text-sm text-slate-400">
+            <a href="@CultureContext.LocalizedPath("/")" class="hover:text-brand">@Localizer["common.home"]</a>
+            <span class="mx-1">/</span>
+            <a href="@CultureContext.LocalizedPath("/hizmetler")" class="hover:text-brand">@Localizer["services.title"]</a>
+            <span class="mx-1">/</span>
+            <span class="text-slate-600">@Model.Title</span>
+        </nav>
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+            <i data-lucide="@Model.Icon" class="h-7 w-7"></i>
+        </div>
+        <h1 class="font-display text-3xl font-extrabold text-ink sm:text-4xl">@Model.Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.Summary))
+        {
+            <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-500">@Model.Summary</p>
+        }
+    </div>
+</section>
+
+<article class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+    {
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="mb-8 w-full rounded-2xl object-cover" />
+    }
+    <div class="prose prose-slate max-w-none">
+        @Html.Raw(Model.Body)
+    </div>
+
+    <div class="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-ink px-8 py-10 text-center">
+        <h3 class="text-xl font-bold text-white">@Localizer["cta.quoteTitle"]</h3>
+        <p class="max-w-xl text-sm text-slate-300">@Localizer["cta.quoteText"]</p>
+        <a href="@CultureContext.LocalizedPath("/contact")" class="btn-brand">@Localizer["cta.quoteButton"]</a>
+    </div>
+</article>

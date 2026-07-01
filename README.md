@@ -1,9 +1,14 @@
-# Starter.Cms — Çok Dilli ASP.NET Core CMS Base
+# AMT Vinç Platform — Çok Dilli ASP.NET Core CMS
 
-Yeni projelere **hızlı başlangıç** için hazır, %100 dinamik, çok dilli, admin panelli bir CMS
-iskeleti. Mail servisi (SMTP), medya kütüphanesi, çok dillilik, marka/tema yönetimi, SEO ve hata
-yönetimi **kutudan çıkar çıkmaz** hazır gelir. Yeni bir site yaparken bu base'i kopyalayıp içerik
-modüllerini ekleyerek devam edersin — altyapıyı her seferinde yeniden yazmazsın.
+**AMT Vinç Platform** (vinç & yüksekte çalışma platformu kiralama) için %100 dinamik, çok dilli
+(TR/EN), admin panelli kurumsal web sitesi. `Starter.Cms` base'i üzerine kurulmuştur; sektöre özel
+**Makine Filosu** (kategori + makine, teknik özellikler) ve **Hizmetler** modülleri eklenmiştir.
+Mail servisi (SMTP), medya kütüphanesi, marka/tema yönetimi, SEO ve hata yönetimi kutudan çıkar
+çıkmaz hazır gelir. **Tüm içerik/görsel/metin admin panelden yönetilir** — sıfır statik içerik.
+
+> İçerik başlangıç olarak vinç/platform sektörüne uygun örnek verilerle tohumlanır; gerçek
+> metin ve görseller admin panelden (`/admin`) girilir. İçerik kaynağı:
+> [instagram.com/amtvinc.platform](https://www.instagram.com/amtvinc.platform/).
 
 > Mimari: `html-to-cms` skill'inin kanıtlanmış desenleri (Alupunch.CmsV2 + quanqi + birleşik-makine
 > projelerinden damıtıldı). **Çeviri-tablosu** deseni (EAV değil): her entity için ayrı
@@ -20,7 +25,7 @@ modüllerini ekleyerek devam edersin — altyapıyı her seferinde yeniden yazma
 ## Hızlı Başlangıç
 
 ```bash
-cd Starter.Cms
+cd AmtVinc.Cms
 npm install          # Tailwind (bir kez)
 npm run build:css    # wwwroot/css/app.css üret (CSS değişince tekrar; veya: npm run watch:css)
 dotnet run           # DB oluşur + tohumlanır, site açılır
@@ -40,7 +45,9 @@ dotnet run           # DB oluşur + tohumlanır, site açılır
 | **Mail / SMTP** | Ayarlar DB'de (admin panel), mail şablonu + **test e-postası**. İletişim formu best-effort gerçek mail atar. |
 | **Medya kütüphanesi** | Tek yükleme deposu; her görsel/PDF alanında "Medyadan Seç". CKEditor yüklemeleri de buraya düşer. |
 | **Marka & Tema** | Logo, favicon, renk, iletişim, sosyal, SEO — hepsi panelden (sıfır statik). Marka rengi siteye anında yansır. |
-| **İçerik** | `Page` (genel sayfa, çoklu layout), `Slide` (hero slider), `ContactMessage` (form mesajları) — dil sekmeli CRUD. |
+| **Makine Filosu** | `MachineCategory` + `Machine` — kategori bazlı filo; teknik özellikler (çalışma yük., kapasite, erişim, ağırlık), öne çıkarma, dil sekmeli CRUD. `/tr/makineler` + `/tr/makine/{slug}`. |
+| **Hizmetler** | `Service` — ikon + görsel + dil sekmeli içerik. Ana sayfa grid'i + `/tr/hizmetler` + `/tr/hizmet/{slug}`. |
+| **Genel İçerik** | `Page` (çoklu layout), `Slide` (hero slider), `ContactMessage` (teklif/iletişim mesajları) — dil sekmeli CRUD. |
 | **SEO** | Canonical, `hreflang` alternate + `x-default`, Open Graph, Twitter Card, JSON-LD (Organization), çok dilli `sitemap.xml`, `robots.txt`. |
 | **Hata yönetimi** | Lokalize, DB'siz 404/403/500 sayfaları; admin hataları in-page banner. |
 
@@ -65,15 +72,15 @@ dotnet run           # DB oluşur + tohumlanır, site açılır
 ## Proje Yapısı
 
 ```
-Starter.Cms/
-├── Domain/            BaseEntity + entity'ler + çeviri tabloları
+AmtVinc.Cms/
+├── Domain/            BaseEntity + entity'ler + çeviri tabloları (Machine · Service · Page · Slide ...)
 ├── Data/              DbContext · DbSeeder · DesignTime factory
-├── Services/          Culture · Caching · FileStorage · Branding · Mail(SMTP) · ColorUtil ...
+├── Services/          Culture · Caching · FileStorage · Branding · Mail(SMTP) · MachineService · ServiceCatalogService ...
 ├── Localization/      DbStringLocalizer + LocalizationStore (DB destekli arayüz metinleri)
-├── Controllers/       Home · Pages · Contact · Seo (sitemap/robots)
+├── Controllers/       Home · Machines · Services · Pages · Contact · Seo (sitemap/robots)
 ├── ViewComponents/    Header · Footer · Slider (DB beslemeli)
-├── Views/             _Layout (SEO/marka/WhatsApp) · sayfa view'ları
-├── Areas/Admin/       Panel: Dashboard · Pages · Slides · Branding · Mail · Media · Messages · Languages · Localization
+├── Views/             _Layout (SEO/marka/WhatsApp) · Machines · Services · sayfa view'ları
+├── Areas/Admin/       Panel: Dashboard · Machines · MachineCategories · Services · Pages · Slides · Branding · Mail · Media · Messages · Languages · Localization
 ├── Styles/app.css     Tailwind kaynağı  →  wwwroot/css/app.css (derlenmiş, depoda)
 └── Program.cs         DI · route tabanlı kültür · routing
 ```

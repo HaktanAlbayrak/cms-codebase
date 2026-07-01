@@ -1,0 +1,79 @@
+@model MachineVm
+@{
+    var specs = new (string Icon, string Label, string Value)[]
+    {
+        ("move-vertical", Localizer["machines.specHeight"].Value, Model.WorkingHeight),
+        ("dumbbell", Localizer["machines.specCapacity"].Value, Model.Capacity),
+        ("move-horizontal", Localizer["machines.specReach"].Value, Model.Reach),
+        ("scale", Localizer["machines.specWeight"].Value, Model.Weight),
+    }.Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToArray();
+}
+
+<section class="border-b border-slate-100 bg-slate-50">
+    <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <nav class="text-sm text-slate-400">
+            <a href="@CultureContext.LocalizedPath("/")" class="hover:text-brand">@Localizer["common.home"]</a>
+            <span class="mx-1">/</span>
+            <a href="@CultureContext.LocalizedPath("/makineler")" class="hover:text-brand">@Localizer["machines.title"]</a>
+            <span class="mx-1">/</span>
+            <span class="text-slate-600">@Model.Name</span>
+        </nav>
+    </div>
+</section>
+
+<section class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2">
+    <div data-lightgallery>
+        <a href="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "#" : Model.ImageUrl)" class="block overflow-hidden rounded-2xl border border-slate-100 bg-slate-100">
+            @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.Name" class="aspect-[4/3] w-full object-cover" />
+            }
+            else
+            {
+                <span class="flex aspect-[4/3] w-full items-center justify-center text-slate-300"><i data-lucide="construction" class="h-16 w-16"></i></span>
+            }
+        </a>
+    </div>
+
+    <div>
+        @if (!string.IsNullOrWhiteSpace(Model.CategoryName))
+        {
+            <a href="@CultureContext.LocalizedPath("/makineler")#kat-@Model.CategorySlug" class="inline-block rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">@Model.CategoryName</a>
+        }
+        <h1 class="mt-3 font-display text-3xl font-extrabold text-ink sm:text-4xl">@Model.Name</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+        {
+            <p class="mt-4 text-lg text-slate-500">@Model.ShortDescription</p>
+        }
+
+        @if (specs.Length > 0)
+        {
+            <dl class="mt-8 grid grid-cols-2 gap-4">
+                @foreach (var s in specs)
+                {
+                    <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-4">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand"><i data-lucide="@s.Icon" class="h-5 w-5"></i></span>
+                        <div>
+                            <dt class="text-xs text-slate-400">@s.Label</dt>
+                            <dd class="text-lg font-bold text-ink" dir="ltr">@s.Value</dd>
+                        </div>
+                    </div>
+                }
+            </dl>
+        }
+
+        <div class="mt-8 flex flex-wrap gap-3">
+            <a href="@CultureContext.LocalizedPath("/contact")" class="btn-brand">@Localizer["cta.quoteButton"]</a>
+            <a href="@CultureContext.LocalizedPath("/makineler")" class="btn-outline">@Localizer["machines.backToList"]</a>
+        </div>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <section class="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
+        <div class="prose prose-slate max-w-none">
+            @Html.Raw(Model.Description)
+        </div>
+    </section>
+}

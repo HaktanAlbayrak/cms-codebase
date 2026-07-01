@@ -1,0 +1,101 @@
+@inject IServiceCatalogService Services
+@inject IMachineService Machines
+@{
+    ViewData["Title"] = null; // ana sayfa → seo.siteTitle kullanılır
+    var culture = CultureContext.Current;
+    var services = await Services.GetAllAsync(culture);
+    var featured = await Machines.GetFeaturedAsync(culture, 6);
+}
+
+@await Component.InvokeAsync("Slider")
+
+@* ── Hizmetler ── *@
+@if (services.Count > 0)
+{
+    <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+        <div class="mb-12 text-center">
+            <p class="mb-2 text-sm font-bold uppercase tracking-wider text-brand">@Localizer["home.servicesKicker"]</p>
+            <h2 class="font-display text-3xl font-extrabold text-ink sm:text-4xl">@Localizer["home.servicesTitle"]</h2>
+            <p class="mx-auto mt-3 max-w-2xl text-slate-500">@Localizer["home.servicesSubtitle"]</p>
+        </div>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            @foreach (var s in services.Take(6))
+            {
+                <a href="@CultureContext.LocalizedPath($"/hizmet/{s.Slug}")"
+                   class="group rounded-2xl border border-slate-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand transition group-hover:bg-brand group-hover:text-white">
+                        <i data-lucide="@s.Icon" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="mb-2 text-lg font-bold text-ink">@s.Title</h3>
+                    <p class="text-sm leading-relaxed text-slate-500">@s.Summary</p>
+                </a>
+            }
+        </div>
+        <div class="mt-10 text-center">
+            <a href="@CultureContext.LocalizedPath("/hizmetler")" class="btn-outline">@Localizer["common.viewAll"]</a>
+        </div>
+    </section>
+}
+
+@* ── Öne çıkan makineler ── *@
+@if (featured.Count > 0)
+{
+    <section class="bg-slate-50 py-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6">
+            <div class="mb-12 text-center">
+                <p class="mb-2 text-sm font-bold uppercase tracking-wider text-brand">@Localizer["home.machinesKicker"]</p>
+                <h2 class="font-display text-3xl font-extrabold text-ink sm:text-4xl">@Localizer["home.machinesTitle"]</h2>
+                <p class="mx-auto mt-3 max-w-2xl text-slate-500">@Localizer["home.machinesSubtitle"]</p>
+            </div>
+            <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach (var m in featured)
+                {
+                    <partial name="_MachineCard" model="m" />
+                }
+            </div>
+            <div class="mt-10 text-center">
+                <a href="@CultureContext.LocalizedPath("/makineler")" class="btn-brand">@Localizer["home.allMachines"]</a>
+            </div>
+        </div>
+    </section>
+}
+
+@* ── Neden Biz? ── *@
+<section class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+    <div class="mb-12 text-center">
+        <h2 class="font-display text-3xl font-extrabold text-ink sm:text-4xl">@Localizer["home.featuresTitle"]</h2>
+    </div>
+    <div class="grid gap-8 md:grid-cols-4">
+        @{
+            var features = new (string Icon, string Title, string Text)[]
+            {
+                ("shield-check", Localizer["home.feature1Title"].Value, Localizer["home.feature1Text"].Value),
+                ("clock", Localizer["home.feature2Title"].Value, Localizer["home.feature2Text"].Value),
+                ("hard-hat", Localizer["home.feature3Title"].Value, Localizer["home.feature3Text"].Value),
+                ("headset", Localizer["home.feature4Title"].Value, Localizer["home.feature4Text"].Value),
+            };
+        }
+        @foreach (var f in features)
+        {
+            <div class="rounded-2xl border border-slate-100 bg-white p-7 text-center shadow-sm transition hover:shadow-md">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+                    <i data-lucide="@f.Icon" class="h-7 w-7"></i>
+                </div>
+                <h3 class="mb-2 text-base font-bold text-ink">@f.Title</h3>
+                <p class="text-sm leading-relaxed text-slate-500">@f.Text</p>
+            </div>
+        }
+    </div>
+</section>
+
+@* ── CTA bandı ── *@
+<section class="bg-ink">
+    <div class="mx-auto flex max-w-5xl flex-col items-center gap-5 px-4 py-16 text-center sm:px-6">
+        <h2 class="font-display text-3xl font-extrabold text-white sm:text-4xl">@Localizer["cta.homeTitle"]</h2>
+        <p class="max-w-2xl text-slate-300">@Localizer["cta.homeText"]</p>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="@CultureContext.LocalizedPath("/contact")" class="btn-brand">@Localizer["cta.quoteButton"]</a>
+            <a href="@CultureContext.LocalizedPath("/makineler")" class="rounded-lg border border-white/30 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">@Localizer["home.allMachines"]</a>
+        </div>
+    </div>
+</section>

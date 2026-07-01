@@ -1,0 +1,128 @@
+@model ServiceEditModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Yeni Hizmet" : "Hizmet Düzenle";
+    var languages = ViewBag.Languages as List<Language> ?? new();
+}
+
+<partial name="_PageHelp" model="@("Her dil için ayrı sekmede içerik girin. İkon adı için lucide.dev ikon adlarını kullanın (ör. crane, truck, construction). Boş bıraktığınız diller site ziyaretinde varsayılan dile düşer.")" />
+
+<form method="post" action="/Admin/Services/Edit" enctype="multipart/form-data" class="space-y-6">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <input type="hidden" name="ImageUrl" id="ImageUrl" value="@Model.ImageUrl" />
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="space-y-5 lg:col-span-2">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <div class="mb-4 flex gap-2 border-b border-slate-200">
+                    @for (var i = 0; i < languages.Count; i++)
+                    {
+                        var lang = languages[i];
+                        <button type="button" class="lang-tab -mb-px border-b-2 px-4 py-2 text-sm font-semibold @(i == 0 ? "border-brand text-brand" : "border-transparent text-slate-400")" data-lang="@lang.Code" onclick="showLang('@lang.Code', this)">
+                            @lang.Name @(lang.IsDefault ? "★" : "")
+                        </button>
+                    }
+                </div>
+
+                @for (var i = 0; i < languages.Count; i++)
+                {
+                    var lang = languages[i];
+                    var code = lang.Code;
+                    <div class="lang-pane space-y-4 @(i == 0 ? "" : "hidden")" data-lang-pane="@code">
+                        <div>
+                            <label class="form-label">Başlık (@code)</label>
+                            <input class="form-input" name="Title[@code]" value="@(Model.Title.TryGetValue(code, out var ti) ? ti : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">Kısa Açıklama (@code)</label>
+                            <input class="form-input" name="Summary[@code]" value="@(Model.Summary.TryGetValue(code, out var su) ? su : "")" />
+                        </div>
+                        <div>
+                            <label class="form-label">Detay İçerik (@code)</label>
+                            <textarea class="form-input ck" name="Body[@code]" rows="8">@(Model.Body.TryGetValue(code, out var bo) ? bo : "")</textarea>
+                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="form-label">SEO Başlık (@code)</label>
+                                <input class="form-input" name="MetaTitle[@code]" value="@(Model.MetaTitle.TryGetValue(code, out var mt) ? mt : "")" />
+                            </div>
+                            <div>
+                                <label class="form-label">SEO Açıklama (@code)</label>
+                                <input class="form-input" name="MetaDescription[@code]" value="@(Model.MetaDescription.TryGetValue(code, out var md) ? md : "")" />
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-4 text-sm font-bold text-ink">Yayın</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="form-label">Slug (URL adı)</label>
+                        <input class="form-input" name="Slug" value="@Model.Slug" placeholder="vinc-kiralama" required />
+                        <p class="mt-1 text-xs text-slate-400">Adres: /tr/hizmet/<span id="slugPreview">@Model.Slug</span></p>
+                    </div>
+                    <div>
+                        <label class="form-label">İkon (lucide adı)</label>
+                        <input class="form-input" name="Icon" id="iconInput" value="@Model.Icon" placeholder="construction" />
+                        <p class="mt-1 flex items-center gap-2 text-xs text-slate-400">Önizleme: <span class="flex h-7 w-7 items-center justify-center rounded bg-brand/10 text-brand"><i data-lucide="@Model.Icon" id="iconPreview" class="h-4 w-4"></i></span></p>
+                    </div>
+                    <div>
+                        <label class="form-label">Sıra</label>
+                        <input class="form-input" name="SortOrder" type="number" value="@Model.SortOrder" />
+                    </div>
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") class="h-4 w-4 rounded border-slate-300" />
+                        Yayında
+                    </label>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h3 class="mb-3 text-sm font-bold text-ink">Görsel</h3>
+                <div id="imagePreview" class="mb-3 @(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "hidden" : "")">
+                    <img src="@Model.ImageUrl" class="w-full rounded-lg border border-slate-200 object-cover" />
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" class="btn-outline !text-xs" onclick="openMediaPicker(function(url){ document.getElementById('ImageUrl').value=url; var p=document.getElementById('imagePreview'); p.classList.remove('hidden'); p.querySelector('img').src=url; }, 'image')">
+                        <i data-lucide="image" class="h-4 w-4"></i>Medyadan Seç
+                    </button>
+                    <input type="file" name="imageFile" accept="image/*" class="text-xs" />
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="btn-brand flex-1">Kaydet</button>
+                <a href="/Admin/Services" class="btn-outline">İptal</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        function showLang(code, btn) {
+            document.querySelectorAll('[data-lang-pane]').forEach(function (p) { p.classList.toggle('hidden', p.getAttribute('data-lang-pane') !== code); });
+            document.querySelectorAll('.lang-tab').forEach(function (t) { t.classList.remove('border-brand', 'text-brand'); t.classList.add('border-transparent', 'text-slate-400'); });
+            btn.classList.add('border-brand', 'text-brand'); btn.classList.remove('border-transparent', 'text-slate-400');
+        }
+        var slugInput = document.querySelector('input[name="Slug"]');
+        if (slugInput) slugInput.addEventListener('input', function () { document.getElementById('slugPreview').textContent = this.value; });
+        var iconInput = document.getElementById('iconInput');
+        if (iconInput) iconInput.addEventListener('change', function () {
+            var ic = document.getElementById('iconPreview');
+            ic.setAttribute('data-lucide', this.value || 'construction');
+            if (window.lucide) lucide.createIcons();
+        });
+
+        if (window.CKEDITOR) {
+            document.querySelectorAll('textarea.ck').forEach(function (ta) {
+                CKEDITOR.replace(ta, { filebrowserUploadUrl: '/Admin/Media/CkUpload', filebrowserUploadMethod: 'form' });
+            });
+        }
+    </script>
+}
