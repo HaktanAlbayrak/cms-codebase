@@ -5,7 +5,7 @@
 }
 
 <section class="border-b border-slate-100 bg-slate-50">
-    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6" data-reveal>
         <nav class="mb-4 text-sm text-slate-400">
             <a href="@CultureContext.LocalizedPath("/")" class="hover:text-brand">@Localizer["common.home"]</a>
             <span class="mx-1">/</span>
@@ -23,10 +23,11 @@
     }
     else
     {
-        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group>
             @foreach (var s in Model)
             {
                 <a href="@CultureContext.LocalizedPath($"/hizmet/{s.Slug}")"
+                   data-reveal
                    class="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                     @if (!string.IsNullOrWhiteSpace(s.ImageUrl))
                     {

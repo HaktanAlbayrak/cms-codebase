@@ -23,13 +23,13 @@
 <article class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
-        <img src="@Model.ImageUrl" alt="@Model.Title" class="mb-8 w-full rounded-2xl object-cover" />
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="mb-8 w-full rounded-2xl object-cover" data-reveal="scale" />
     }
-    <div class="prose prose-slate max-w-none">
+    <div class="prose prose-slate max-w-none" data-reveal>
         @Html.Raw(Model.Body)
     </div>
 
-    <div class="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-ink px-8 py-10 text-center">
+    <div class="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-ink px-8 py-10 text-center" data-reveal>
         <h3 class="text-xl font-bold text-white">@Localizer["cta.quoteTitle"]</h3>
         <p class="max-w-xl text-sm text-slate-300">@Localizer["cta.quoteText"]</p>
         <a href="@CultureContext.LocalizedPath("/contact")" class="btn-brand">@Localizer["cta.quoteButton"]</a>

@@ -22,7 +22,7 @@
 </section>
 
 <section class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2">
-    <div data-lightgallery>
+    <div data-lightgallery data-reveal="left">
         <a href="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "#" : Model.ImageUrl)" class="block overflow-hidden rounded-2xl border border-slate-100 bg-slate-100">
             @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
             {
@@ -35,7 +35,7 @@
         </a>
     </div>
 
-    <div>
+    <div data-reveal="right">
         @if (!string.IsNullOrWhiteSpace(Model.CategoryName))
         {
             <a href="@CultureContext.LocalizedPath("/makineler")#kat-@Model.CategorySlug" class="inline-block rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">@Model.CategoryName</a>
@@ -72,7 +72,7 @@
 @if (!string.IsNullOrWhiteSpace(Model.Description))
 {
     <section class="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
-        <div class="prose prose-slate max-w-none">
+        <div class="prose prose-slate max-w-none" data-reveal>
             @Html.Raw(Model.Description)
         </div>
     </section>

@@ -8,6 +8,7 @@
     }.Where(s => !string.IsNullOrWhiteSpace(s.Value)).ToArray();
 }
 <a href="@CultureContext.LocalizedPath($"/makine/{Model.Slug}")"
+   data-reveal
    class="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
     <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
         @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))

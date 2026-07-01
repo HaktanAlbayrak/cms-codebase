@@ -5,7 +5,7 @@
 }
 
 <section class="border-b border-slate-100 bg-slate-50">
-    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
+    <div class="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6" data-reveal>
         <nav class="mb-4 text-sm text-slate-400">
             <a href="@CultureContext.LocalizedPath("/")" class="hover:text-brand">@Localizer["common.home"]</a>
             <span class="mx-1">/</span>
@@ -37,11 +37,11 @@
         @foreach (var c in Model)
         {
             <section id="kat-@c.Slug" class="mb-16 scroll-mt-24">
-                <div class="mb-6 flex items-center gap-3">
+                <div class="mb-6 flex items-center gap-3" data-reveal="left">
                     <span class="h-6 w-1.5 rounded-full bg-brand"></span>
                     <h2 class="font-display text-2xl font-extrabold text-ink">@c.Name</h2>
                 </div>
-                <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group>
                     @foreach (var m in c.Machines)
                     {
                         <partial name="_MachineCard" model="m" />

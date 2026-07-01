@@ -471,6 +471,8 @@ public static class DbSeeder
             ("common.readMore", "Detaylı Bilgi →", "Learn more →"),
             ("common.viewAll", "Tüm Hizmetler", "All Services"),
             ("common.emptyContent", "İçerik yakında eklenecektir.", "Content will be added soon."),
+            ("common.previous", "Önceki", "Previous"),
+            ("common.next", "Sonraki", "Next"),
 
             ("notFound.title", "Sayfa Bulunamadı", "Page Not Found"),
             ("notFound.text", "Aradığınız sayfa taşınmış veya hiç var olmamış olabilir.", "The page you are looking for may have moved or never existed."),
