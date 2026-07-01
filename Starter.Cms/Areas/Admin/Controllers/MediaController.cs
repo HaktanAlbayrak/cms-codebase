@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Starter.Cms.Areas.Admin.Models;
@@ -125,27 +124,23 @@ public class MediaController : AdminControllerBase
         return RedirectToAction(nameof(Index));
     }
 
-    // ── CKEditor entegrasyonu — yüklenen görsel de kütüphaneye düşer ──
+    // ── CKEditor 5 (SimpleUploadAdapter) entegrasyonu — yüklenen görsel de kütüphaneye düşer ──
+    // Başarı: { "url": "..." } · Hata: 400 + { "error": { "message": "..." } }
     [HttpPost]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> CkUpload(IFormFile? upload, int CKEditorFuncNum)
+    public async Task<IActionResult> CkUpload(IFormFile? upload)
     {
         try
         {
             if (upload is not { Length: > 0 }) throw new InvalidOperationException("Dosya bulunamadı.");
             var asset = await _media.UploadAsync(upload, "icerik");
-            return CkCallback(CKEditorFuncNum, asset.Url, "");
+            return Json(new { url = asset.Url });
         }
         catch (Exception ex)
         {
-            return CkCallback(CKEditorFuncNum, "", ex.Message);
+            return StatusCode(400, new { error = new { message = ex.Message } });
         }
     }
-
-    private ContentResult CkCallback(int funcNum, string url, string message) =>
-        Content(
-            $"<script>window.parent.CKEDITOR.tools.callFunction({funcNum}, {JsonSerializer.Serialize(url)}, {JsonSerializer.Serialize(message)});</script>",
-            "text/html");
 
     private async Task PopulateLanguagesAsync() =>
         ViewBag.Languages = await _db.Languages.Where(l => l.IsActive).OrderBy(l => l.SortOrder)

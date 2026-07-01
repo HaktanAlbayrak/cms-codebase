@@ -24,11 +24,17 @@ public class BrandingInfo
     private string Get(string key, string fallback = "") =>
         Raw.TryGetValue(key, out var v) && !string.IsNullOrWhiteSpace(v) ? v : fallback;
 
+    // Varsayılan marka görselleri (depoda hazır gelir; panelden değiştirilebilir).
+    // Header/footer'da logo ZORUNLUDUR: kullanıcı yüklemezse bu varsayılanlar gösterilir.
+    public const string DefaultLogo = "/img/logo.svg";           // açık zemin (header)
+    public const string DefaultLogoLight = "/img/logo-light.svg"; // koyu zemin (footer)
+    public const string DefaultFavicon = "/favicon.svg";
+
     // ── Marka ──
     public string CompanyName => Get("branding.companyName", "Starter");
-    public string? LogoUrl => Get("branding.logoUrl");                 // açık zemin (header)
-    public string? LogoLightUrl => Get("branding.logoLightUrl");      // koyu zemin (footer)
-    public string FaviconUrl => Get("branding.faviconUrl", "/favicon.ico");
+    public string LogoUrl => Get("branding.logoUrl", DefaultLogo);              // açık zemin (header) — hep dolu
+    public string LogoLightUrl => Get("branding.logoLightUrl", DefaultLogoLight); // koyu zemin (footer) — hep dolu
+    public string FaviconUrl => Get("branding.faviconUrl", DefaultFavicon);
     public string Address => Get("branding.address", "");
     public string WorkingHours => Get("branding.workingHours", "");
 

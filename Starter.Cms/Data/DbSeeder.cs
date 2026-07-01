@@ -97,11 +97,12 @@ public static class DbSeeder
         Add("social.linkedin", "", "social");
         Add("social.youtube", "", "social");
 
-        // Marka (logo boşsa firma adı metni gösterilir)
+        // Marka. Logo header/footer'da zorunludur; varsayılan logo/favicon depoda hazır gelir
+        // (/img/logo.svg · /img/logo-light.svg · /favicon.svg), panelden değiştirilebilir.
         Add("branding.companyName", "Starter", "branding");
-        Add("branding.logoUrl", "", "branding");
-        Add("branding.logoLightUrl", "", "branding");
-        Add("branding.faviconUrl", "/favicon.ico", "branding");
+        Add("branding.logoUrl", "/img/logo.svg", "branding");
+        Add("branding.logoLightUrl", "/img/logo-light.svg", "branding");
+        Add("branding.faviconUrl", "/favicon.svg", "branding");
         Add("branding.address", "Örnek Mah. Örnek Cad. No:1, İstanbul", "branding");
         Add("branding.workingHours", "Pzt - Cuma: 09:00 - 18:00", "branding");
 

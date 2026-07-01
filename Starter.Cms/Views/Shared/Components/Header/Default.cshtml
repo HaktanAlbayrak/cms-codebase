@@ -6,14 +6,8 @@
 <header class="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur">
     <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <a href="@Loc("/")" class="flex items-center gap-2">
-            @if (!string.IsNullOrWhiteSpace(brand.LogoUrl))
-            {
-                <img src="@brand.LogoUrl" alt="@brand.CompanyName" class="h-9 w-auto" />
-            }
-            else
-            {
-                <span class="font-display text-xl font-extrabold text-brand">@brand.CompanyName</span>
-            }
+            @* Logo zorunlu — kullanıcı yüklemezse varsayılan logo (BrandingService.DefaultLogo) gelir. *@
+            <img src="@brand.LogoUrl" alt="@brand.CompanyName" class="h-9 w-auto sm:h-10" />
         </a>
 
         <nav class="hidden items-center gap-1 md:flex">

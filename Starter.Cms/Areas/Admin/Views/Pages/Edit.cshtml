@@ -113,7 +113,7 @@
 </form>
 
 @section Scripts {
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    @* Zengin metin editörü (CKEditor 5) _AdminLayout'ta merkezî olarak yüklenir. *@
     <script>
         var layoutData = {
             standard: "@layouts[0].Desc",
@@ -131,16 +131,5 @@
         var slugInput = document.querySelector('input[name="Slug"]');
         if (slugInput) slugInput.addEventListener('input', function () { document.getElementById('slugPreview').textContent = this.value; });
         updateLayoutPreview();
-
-        if (window.CKEDITOR) {
-            CKEDITOR.replaceClass = 'ck';
-            CKEDITOR.editorConfig = function (config) {
-                config.filebrowserUploadUrl = '/Admin/Media/CkUpload';
-                config.filebrowserUploadMethod = 'form';
-            };
-            document.querySelectorAll('textarea.ck').forEach(function (ta) {
-                CKEDITOR.replace(ta, { filebrowserUploadUrl: '/Admin/Media/CkUpload', filebrowserUploadMethod: 'form' });
-            });
-        }
     </script>
 }

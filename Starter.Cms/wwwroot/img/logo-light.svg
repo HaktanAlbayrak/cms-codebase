@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 48" width="210" height="48" role="img" aria-label="Starter CMS">
+  <rect x="2" y="8" width="32" height="32" rx="9" fill="#3b82f6"/>
+  <path d="M12 30l6-14 6 14M14.5 25.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="44" y="31" font-family="'Segoe UI',Arial,sans-serif" font-size="21" font-weight="800" letter-spacing="-0.5" fill="#ffffff">Starter<tspan fill="#93c5fd">CMS</tspan></text>
+</svg>
